@@ -16,12 +16,34 @@ class Track extends Model
     ];
 
     protected $casts = [
-        'is_published' => 'boolean',
-        'release_date' => 'date',
+        'is_published'     => 'boolean',
+        'release_date'     => 'date',
+        'price_idr'        => 'integer',
+        'duration_seconds' => 'integer',
+        'bpm'              => 'integer',
     ];
 
+    // otomatis resolve via slug
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
+    /** relasi: Track milik 1 Genre */
     public function genre()
     {
         return $this->belongsTo(Genre::class);
+    }
+
+    /** scope: hanya published */
+    public function scopePublished($query)
+    {
+        return $query->where('is_published', true);
+    }
+
+    /** accessor harga format IDR */
+    public function getPriceFormattedAttribute()
+    {
+        return 'IDR ' . number_format($this->price_idr, 0, ',', '.');
     }
 }

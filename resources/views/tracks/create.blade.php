@@ -1,150 +1,9 @@
-{{-- resources/views/master.blade.php --}}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>@yield('title','BeatHive')</title>
+{{-- resources/views/tracks/create.blade.php --}}
+@extends('layouts.master')
 
-  {{-- Favicon --}}
-  <link rel="shortcut icon" href="{{ asset('assets/compiled/svg/favicon.svg') }}" type="image/svg+xml" />
+@section('title', 'Tracks – Create | BeatHive')
 
-  {{-- ===== CSS GLOBAL (WAJIB) ===== --}}
-  <link rel="stylesheet" href="{{ asset('assets/compiled/css/app.css') }}" />
-  <link rel="stylesheet" href="{{ asset('assets/compiled/css/app-dark.css') }}" />
-  <link rel="stylesheet" href="{{ asset('assets/compiled/css/iconly.css') }}" />
-  {{-- (opsional) Bootstrap Icons jika dipakai di view --}}
-  <link rel="stylesheet" href="{{ asset('assets/extensions/bootstrap-icons/font/bootstrap-icons.min.css') }}"/>
-
-  {{-- ===== Slot CSS per-halaman (index mendorong DataTables di sini) ===== --}}
-  @stack('styles')
-</head>
-
-<body>
-  <script src="{{ asset('assets/static/js/initTheme.js') }}"></script>
-  <div id="app">
-    <div id="main" class="layout-horizontal">
-
-      {{-- =================== HEADER =================== --}}
-      <header class="mb-5">
-        <div class="header-top">
-          <div class="container">
-            <div class="logo">
-              <a href="{{ url('/') }}">
-                <img src="{{ asset('assets/compiled/svg/logo.svg') }}" alt="BeatHive Logo" />
-              </a>
-            </div>
-
-            <div class="header-top-right d-flex align-items-center">
-              {{-- Toggle Dark/Light --}}
-              <div class="theme-toggle d-flex gap-2 align-items-center mt-2">
-                <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                     class="bi bi-brightness-high" viewBox="0 0 16 16" style="display:none">
-                  <path d="M12 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/>
-                  <path d="M8 0a.5.5 0 0 1 .5.5V2a.5.5 0 0 1-1 0V.5A.5.5 0 0 1 8 0zM8 14a.5.5 0 0 1 .5.5V16a.5.5 0 0 1-1 0v-1.5a.5.5 0 0 1 .5-.5zM16 8a.5.5 0 0 1-.5.5H14a.5.5 0 0 1 0-1h1.5a.5.5 0 0 1 .5.5zM2 8a.5.5 0 0 1-.5.5H0a.5.5 0 0 1 0-1h1.5a.5.5 0 0 1 .5.5z"/>
-                  <path d="M13.657 2.343a.5.5 0 0 1 0 .707L12.5 4.207a.5.5 0 1 1-.707-.707l1.157-1.157a.5.5 0 0 1 .707 0zm-9.9 9.9a.5.5 0 0 1 0 .707L2.5 14.207a.5.5 0 0 1-.707-.707l1.157-1.157a.5.5 0 0 1 .707 0z"/>
-                </svg>
-                <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                     class="bi bi-moon" viewBox="0 0 16 16">
-                  <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.278 7.278 7.278 1.248 0 2.427-.314 3.46-.878a.768.768 0 0 1 .858.08.75.75 0 0 1 .146.99A8.001 8.001 0 1 1 6 .278z"/>
-                </svg>
-                <div class="form-check form-switch fs-6">
-                  <input class="form-check-input me-0" type="checkbox" id="toggle-dark" style="cursor:pointer" />
-                  <label class="form-check-label" for="toggle-dark"></label>
-                </div>
-              </div>
-
-              {{-- Auth buttons (dummy) --}}
-              <div class="d-none d-xl-flex align-items-center gap-2 ms-3">
-                <a href="#" class="btn btn-outline-primary btn-sm">Login</a>
-                <a href="#" class="btn btn-primary btn-sm">Register</a>
-              </div>
-
-              <a href="#" class="burger-btn d-block d-xl-none"><i class="bi bi-justify fs-3"></i></a>
-            </div>
-          </div>
-        </div>
-
-        {{-- NAVBAR utama --}}
-        <nav class="main-navbar">
-          <div class="container">
-            <ul>
-              <li class="menu-item">
-                <a href="{{ url('/') }}" class="menu-link">
-                  <span><i class="bi bi-grid-fill"></i> Dashboard</span>
-                </a>
-              </li>
-
-              <li class="menu-item has-sub">
-                <a href="#" class="menu-link"><span><i class="bi bi-music-note-list"></i> Catalog</span></a>
-                <div class="submenu">
-                  <div class="submenu-group-wrapper">
-                    <ul class="submenu-group">
-                      <li class="submenu-item"><a href="{{ route('tracks.index') }}" class="submenu-link">All Tracks</a></li>
-                      <li class="submenu-item"><a href="#" class="submenu-link">Albums / Packs</a></li>
-                      <li class="submenu-item"><a href="#" class="submenu-link">Genres & Tags</a></li>
-                    </ul>
-                  </div>
-                </div>
-              </li>
-
-              <li class="menu-item has-sub">
-                <a href="#" class="menu-link"><span><i class="bi bi-cloud-upload-fill"></i> Upload</span></a>
-                <div class="submenu">
-                  <div class="submenu-group-wrapper">
-                    <ul class="submenu-group">
-                      <li class="submenu-item"><a href="{{ route('tracks.create') }}" class="submenu-link">Upload Track</a></li>
-                      <li class="submenu-item"><a href="#" class="submenu-link">Bulk Import</a></li>
-                    </ul>
-                  </div>
-                </div>
-              </li>
-
-              <li class="menu-item has-sub">
-                <a href="#" class="menu-link"><span><i class="bi bi-bag-check-fill"></i> Sales</span></a>
-                <div class="submenu">
-                  <div class="submenu-group-wrapper">
-                    <ul class="submenu-group">
-                      <li class="submenu-item"><a href="#" class="submenu-link">Orders</a></li>
-                      <li class="submenu-item"><a href="#" class="submenu-link">Licenses</a></li>
-                      <li class="submenu-item"><a href="#" class="submenu-link">Payouts</a></li>
-                    </ul>
-                  </div>
-                </div>
-              </li>
-
-              <li class="menu-item">
-                <a href="#" class="menu-link"><span><i class="bi bi-graph-up"></i> Analytics</span></a>
-              </li>
-
-              <li class="menu-item has-sub">
-                <a href="#" class="menu-link"><span><i class="bi bi-life-preserver"></i> Support</span></a>
-                <div class="submenu">
-                  <div class="submenu-group-wrapper">
-                    <ul class="submenu-group">
-                      <li class="submenu-item"><a href="#" class="submenu-link">Tickets</a></li>
-                      <li class="submenu-item"><a href="#" class="submenu-link">Reviews</a></li>
-                      <li class="submenu-item"><a href="#" class="submenu-link">FAQ</a></li>
-                    </ul>
-                  </div>
-                </div>
-              </li>
-
-              {{-- Login/Register nav (dummy) --}}
-              <li class="menu-item">
-                <a href="#" class="menu-link"><span><i class="bi bi-box-arrow-in-right"></i> Login</span></a>
-              </li>
-              <li class="menu-item">
-                <a href="#" class="menu-link"><span><i class="bi bi-person-plus"></i> Register</span></a>
-              </li>
-            </ul>
-          </div>
-        </nav>
-      </header>
-
-      {{-- =================== PAGE CONTENT =================== --}}
-      @yield('content')
-      @section('content')
+@section('content')
 <div class="content-wrapper container">
   <div class="page-heading d-flex justify-content-between align-items-center">
     <div>
@@ -156,7 +15,7 @@
     </a>
   </div>
 
-  {{-- Error summary (opsional) --}}
+  {{-- Error summary --}}
   @if ($errors->any())
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
       <strong>Periksa lagi isianmu:</strong>
@@ -178,7 +37,8 @@
           </div>
 
           <div class="card-body">
-            <form class="form form-vertical" method="POST"
+            <form class="form form-vertical"
+                  method="POST"
                   action="{{ route('tracks.store') }}"
                   enctype="multipart/form-data">
               @csrf
@@ -220,7 +80,7 @@
                       <select id="genre_id" name="genre_id"
                               class="form-control @error('genre_id') is-invalid @enderror">
                         <option value="">-- Select Genre --</option>
-                        @foreach($genres ?? [] as $g)
+                        @foreach(($genres ?? []) as $g)
                           <option value="{{ $g->id }}" @selected(old('genre_id') == $g->id)>{{ $g->name }}</option>
                         @endforeach
                       </select>
@@ -343,7 +203,7 @@
                   </div>
                 </div>
 
-                {{-- Files (match controller: cover_path / preview_path / bundle_path) --}}
+                {{-- Files --}}
                 <div class="col-md-4 col-12 mb-3">
                   <div class="form-group">
                     <label for="cover_path">Cover Image (JPG/PNG)</label>
@@ -388,55 +248,29 @@
     </div>
   </section>
 </div>
+@endsection
 
+@push('scripts')
+<script>
+  // Info file kecil: nama + size
+  const human = (bytes) => {
+    if (!bytes) return '';
+    const units = ['B','KB','MB','GB']; let i=0;
+    while (bytes >= 1024 && i < units.length-1) { bytes /= 1024; i++; }
+    return bytes.toFixed(1)+' '+units[i];
+  };
 
-      {{-- =================== FOOTER =================== --}}
-      <footer>
-        <div class="container">
-          <div class="footer clearfix mb-0 text-muted">
-            <div class="float-start">
-              <p>BeatHive &copy; {{ date('Y') }}</p>
-            </div>
-            <div class="float-end">
-              <p>Crafted with <span class="text-danger"><i class="bi bi-heart"></i></span> by <a href="#">TRPL-516</a></p>
-            </div>
-          </div>
-        </div>
-      </footer>
-
-    </div>
-  </div>
-  
-  {{-- =================== JS GLOBAL =================== --}}
-  <script>
-    // toggle dark/light kecil
-    (function() {
-      const toggle = document.getElementById('toggle-dark');
-      const sun = document.getElementById('icon-sun');
-      const moon = document.getElementById('icon-moon');
-      if (!toggle || !sun || !moon) return;
-      const apply = () => {
-        const dark = document.documentElement.classList.contains('dark');
-        sun.style.display = dark ? 'block' : 'none';
-        moon.style.display = dark ? 'none' : 'block';
-        toggle.checked = dark;
-      };
-      apply();
-      toggle.addEventListener('change', () => {
-        document.documentElement.classList.toggle('dark');
-        apply();
-      });
-    })();
-  </script>
-
-  <script src="{{ asset('assets/static/js/pages/horizontal-layout.js') }}"></script>
-  <script src="{{ asset('assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
-  <script src="{{ asset('assets/compiled/js/app.js') }}"></script>
-
-  {{-- (opsional) Charts lib jika dipakai di halaman tertentu --}}
-  {{-- <script src="{{ asset('assets/extensions/apexcharts/apexcharts.min.js') }}"></script> --}}
-
-  {{-- ===== Slot JS per-halaman (index: DataTables, create: custom js) ===== --}}
-  @stack('scripts')
-</body>
-</html>
+  const bindInfo = (inputId, infoId) => {
+    const i = document.getElementById(inputId);
+    const s = document.getElementById(infoId);
+    if (!i || !s) return;
+    i.addEventListener('change', () => {
+      const f = i.files?.[0];
+      s.textContent = f ? `${f.name} • ${human(f.size)}` : '';
+    });
+  };
+  bindInfo('cover_path','cover_info');
+  bindInfo('preview_path','preview_info');
+  bindInfo('bundle_path','bundle_info');
+</script>
+@endpush
