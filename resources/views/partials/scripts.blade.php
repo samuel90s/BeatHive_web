@@ -6,3 +6,36 @@
 
 {{-- Charts --}}
 <script src="{{ asset('assets/extensions/apexcharts/apexcharts.min.js') }}"></script>
+<script>
+(function () {
+  const KEY = 'theme'; // 'light' | 'dark'
+  const $html = document.documentElement;
+  const $toggle = document.getElementById('toggle-dark');
+
+  function applyTheme(theme) {
+    if (theme === 'dark') {
+      $html.classList.add('theme-dark');
+      if ($toggle) $toggle.checked = true;
+    } else {
+      $html.classList.remove('theme-dark');
+      if ($toggle) $toggle.checked = false;
+    }
+  }
+
+  // init: from localStorage or system preference
+  let saved = localStorage.getItem(KEY);
+  if (!saved) {
+    saved = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  applyTheme(saved);
+
+  // bind toggle
+  if ($toggle) {
+    $toggle.addEventListener('change', () => {
+      const next = $toggle.checked ? 'dark' : 'light';
+      localStorage.setItem(KEY, next);
+      applyTheme(next);
+    });
+  }
+})();
+</script>

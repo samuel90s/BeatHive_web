@@ -23,12 +23,12 @@
           </svg>
           <div class="form-check form-switch fs-6">
             <input class="form-check-input me-0" type="checkbox" id="toggle-dark" style="cursor: pointer" />
-            <label class="form-check-label" for="toggle-dark"></label>
+            <label class="form-check-label" for="toggle-dark" aria-label="Toggle dark mode"></label>
           </div>
         </div>
 
         @guest
-          {{-- BELUM LOGIN --}}
+          {{-- (Top-right) tombol Login/Register tetap, bukan di navbar --}}
           <div class="d-none d-xl-flex align-items-center gap-2 ms-3">
             <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm">Login</a>
             <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Register</a>
@@ -48,14 +48,8 @@
               </div>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="topbarUserDropdown">
-              <li>
-                <a class="dropdown-item"
-                   href="{{ Route::has('account') ? route('account') : '#' }}">My Account</a>
-              </li>
-              <li>
-                <a class="dropdown-item"
-                   href="{{ Route::has('settings') ? route('settings') : '#' }}">Settings</a>
-              </li>
+              <li><a class="dropdown-item" href="{{ Route::has('account') ? route('account') : '#' }}">My Account</a></li>
+              <li><a class="dropdown-item" href="{{ Route::has('settings') ? route('settings') : '#' }}">Settings</a></li>
               <li><hr class="dropdown-divider" /></li>
               <li>
                 <form action="{{ Route::has('logout') ? route('logout') : '#' }}" method="POST">
@@ -90,15 +84,9 @@
           <div class="submenu">
             <div class="submenu-group-wrapper">
               <ul class="submenu-group">
-                <li class="submenu-item">
-                  <a href="{{ route('tracks.index') }}" class="submenu-link">All Tracks</a>
-                </li>
-                <li class="submenu-item">
-                  <a href="{{ Route::has('albums.index') ? route('albums.index') : '#' }}" class="submenu-link">Albums / Packs</a>
-                </li>
-                <li class="submenu-item">
-                  <a href="{{ Route::has('genres.index') ? route('genres.index') : '#' }}" class="submenu-link">Genres & Tags</a>
-                </li>
+                <li class="submenu-item"><a href="{{ route('tracks.index') }}" class="submenu-link">All Tracks</a></li>
+                <li class="submenu-item"><a href="{{ Route::has('albums.index') ? route('albums.index') : '#' }}" class="submenu-link">Albums / Packs</a></li>
+                <li class="submenu-item"><a href="{{ Route::has('genres.index') ? route('genres.index') : '#' }}" class="submenu-link">Genres & Tags</a></li>
               </ul>
             </div>
           </div>
@@ -110,12 +98,8 @@
           <div class="submenu">
             <div class="submenu-group-wrapper">
               <ul class="submenu-group">
-                <li class="submenu-item">
-                  <a href="{{ route('tracks.create') }}" class="submenu-link">Upload Track</a>
-                </li>
-                <li class="submenu-item">
-                  <a href="{{ route('tracks.bulk.import') }}" class="submenu-link">Bulk Import</a>
-                </li>
+                <li class="submenu-item"><a href="{{ route('tracks.create') }}" class="submenu-link">Upload Track</a></li>
+                <li class="submenu-item"><a href="{{ route('tracks.bulk.import') }}" class="submenu-link">Bulk Import</a></li>
               </ul>
             </div>
           </div>
@@ -127,15 +111,9 @@
           <div class="submenu">
             <div class="submenu-group-wrapper">
               <ul class="submenu-group">
-                <li class="submenu-item">
-                  <a href="{{ Route::has('orders.index') ? route('orders.index') : '#' }}" class="submenu-link">Orders</a>
-                </li>
-                <li class="submenu-item">
-                  <a href="{{ Route::has('licenses.index') ? route('licenses.index') : '#' }}" class="submenu-link">Licenses</a>
-                </li>
-                <li class="submenu-item">
-                  <a href="{{ Route::has('payouts.index') ? route('payouts.index') : '#' }}" class="submenu-link">Payouts</a>
-                </li>
+                <li class="submenu-item"><a href="{{ Route::has('orders.index') ? route('orders.index') : '#' }}" class="submenu-link">Orders</a></li>
+                <li class="submenu-item"><a href="{{ Route::has('licenses.index') ? route('licenses.index') : '#' }}" class="submenu-link">Licenses</a></li>
+                <li class="submenu-item"><a href="{{ Route::has('payouts.index') ? route('payouts.index') : '#' }}" class="submenu-link">Payouts</a></li>
               </ul>
             </div>
           </div>
@@ -154,32 +132,15 @@
           <div class="submenu">
             <div class="submenu-group-wrapper">
               <ul class="submenu-group">
-                <li class="submenu-item">
-                  <a href="{{ Route::has('tickets.index') ? route('tickets.index') : '#' }}" class="submenu-link">Tickets</a>
-                </li>
-                <li class="submenu-item">
-                  <a href="{{ Route::has('reviews.index') ? route('reviews.index') : '#' }}" class="submenu-link">Reviews</a>
-                </li>
-                <li class="submenu-item">
-                  <a href="{{ Route::has('faq') ? route('faq') : '#' }}" class="submenu-link">FAQ</a>
-                </li>
+                <li class="submenu-item"><a href="{{ Route::has('tickets.index') ? route('tickets.index') : '#' }}" class="submenu-link">Tickets</a></li>
+                <li class="submenu-item"><a href="{{ Route::has('reviews.index') ? route('reviews.index') : '#' }}" class="submenu-link">Reviews</a></li>
+                <li class="submenu-item"><a href="{{ Route::has('faq') ? route('faq') : '#' }}" class="submenu-link">FAQ</a></li>
               </ul>
             </div>
           </div>
         </li>
 
-        @guest
-          <li class="menu-item {{ request()->routeIs('login') ? 'active' : '' }}">
-            <a href="{{ route('login') }}" class="menu-link">
-              <span><i class="bi bi-box-arrow-in-right"></i> Login</span>
-            </a>
-          </li>
-          <li class="menu-item {{ request()->routeIs('register') ? 'active' : '' }}">
-            <a href="{{ route('register') }}" class="menu-link">
-              <span><i class="bi bi-person-plus"></i> Register</span>
-            </a>
-          </li>
-        @endguest
+        {{-- (Dihapus) Login / Register di navbar --}}
       </ul>
     </div>
   </nav>
