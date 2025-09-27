@@ -6,15 +6,16 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rules\Password as PasswordRule;
 
 class AuthController extends Controller
 {
     // ===== Role mapping (int) =====
-    private const ROLE_ADMIN   = 1;
-    private const ROLE_ARTIST  = 2;
-    private const ROLE_CUSTOMER= 3; // default
-    private const ROLE_STUDENT = 4;
+    private const ROLE_ADMIN    = 1;
+    private const ROLE_ARTIST   = 2;
+    private const ROLE_CUSTOMER = 3; // default
+    private const ROLE_STUDENT  = 4;
 
     // --------- PAGES ---------
     public function showLogin()
@@ -32,6 +33,11 @@ class AuthController extends Controller
         return view('auth.forgot-password');
     }
 
+    public function showReset(string $token)
+    {
+        return view('auth.reset-password', ['token' => $token]);
+    }
+
     // --------- ACTIONS ---------
     public function login(Request $request)
     {
@@ -40,10 +46,9 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        // Ambil user by email
         $user = User::where('email', $data['email'])->first();
-
         $ok = false;
+
         if ($user) {
             $stored = (string) $user->password;
             $plain  = (string) $data['password'];
@@ -52,7 +57,6 @@ class AuthController extends Controller
             if (str_starts_with($stored, '$')) {
                 $ok = Hash::check($plain, $stored);
 
-                // Optional: rehash jika perlu
                 if ($ok && Hash::needsRehash($stored)) {
                     $user->password = Hash::make($plain);
                     $user->save();
@@ -73,23 +77,18 @@ class AuthController extends Controller
                 ->withErrors(['email' => 'Email atau password salah!']);
         }
 
-        // Login ke session Laravel
-        Auth::login($user, false); // remember me: false (bisa ditambah nanti)
+        Auth::login($user, false);
 
         // Optional: catat last_login_at jika kolomnya ada
         if (schema_has_column('users', 'last_login_at')) {
             $user->forceFill(['last_login_at' => now()])->save();
         }
 
-        // Redirect per role (int)
         $role = (int) ($user->role ?? self::ROLE_CUSTOMER);
         switch ($role) {
             case self::ROLE_ADMIN:
-                return redirect()->intended(route('home'));
             case self::ROLE_STUDENT:
-                return redirect()->intended(route('home')); // ganti jika punya dashboard khusus
             case self::ROLE_ARTIST:
-                return redirect()->intended(route('home')); // ganti jika punya dashboard artist
             case self::ROLE_CUSTOMER:
             default:
                 return redirect()->intended(route('home'));
@@ -102,16 +101,16 @@ class AuthController extends Controller
             'name'                  => ['required', 'string', 'max:100'],
             'username'              => ['required', 'string', 'min:3', 'max:32', 'alpha_dash', 'unique:users,username'],
             'email'                 => ['required', 'email', 'max:150', 'unique:users,email'],
-            'password'              => ['required', 'confirmed', Password::min(6)],
+            'password'              => ['required', 'confirmed', PasswordRule::min(6)],
             'password_confirmation' => ['required'],
         ]);
 
         $user = new User();
         $user->name     = $data['name'];
-        $user->username = $data['username'];   // ⬅️ penting
+        $user->username = $data['username'];
         $user->email    = $data['email'];
         $user->password = Hash::make($data['password']);
-        $user->role     = self::ROLE_CUSTOMER; // 3
+        $user->role     = self::ROLE_CUSTOMER;
         $user->save();
 
         Auth::login($user, false);
@@ -119,14 +118,43 @@ class AuthController extends Controller
         return redirect()->intended(route('home'))->with('success', 'Registrasi berhasil.');
     }
 
+    // Kirim link reset password via email
     public function sendResetLink(Request $request)
     {
-        // Placeholder (dummy). Nanti ganti dengan Password::sendResetLink
         $request->validate([
             'email' => ['required', 'email', 'exists:users,email'],
         ]);
 
-        return back()->with('status', 'Link reset password telah dikirim (dummy).');
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+            ? back()->with('status', __($status))
+            : back()->withErrors(['email' => __($status)]);
+    }
+
+    // Reset password
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token'    => ['required'],
+            'email'    => ['required', 'email'],
+            'password' => ['required', 'confirmed', PasswordRule::min(6)],
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                ])->save();
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('status', __($status))
+            : back()->withErrors(['email' => [__($status)]]);
     }
 
     public function logout(Request $request)
@@ -140,8 +168,7 @@ class AuthController extends Controller
 }
 
 /**
- * Helper kecil untuk cek kolom ada (tanpa harus pakai Schema facade di setiap tempat).
- * Taruh di file ini biar simpel; bisa juga kamu pindahkan ke helper global.
+ * Helper kecil untuk cek kolom ada
  */
 if (!function_exists('schema_has_column')) {
     function schema_has_column(string $table, string $column): bool
