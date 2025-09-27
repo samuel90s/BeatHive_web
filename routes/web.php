@@ -39,16 +39,19 @@ Route::redirect('/tracks_create', '/tracks/create', 301);
 // =======================
 // Tracks group (custom endpoints + CRUD)
 // =======================
-Route::prefix('tracks')->name('tracks.')->group(function () {
+Route::middleware(['auth'])->prefix('tracks')->name('tracks.')->group(function () {
     // Quick search JSON (untuk Select2/autocomplete)
     Route::get('search/json', [TrackController::class, 'search'])->name('search');
 
-    // Bulk import (halaman + submit)
+    // Bulk import (halaman + submit) → idealnya hanya admin
     Route::get('bulk-import', [TrackController::class, 'bulkImport'])->name('bulk.import');
     Route::post('bulk-import', [TrackController::class, 'bulkImportStore'])->name('bulk.import.store');
 
-    // Toggle publish (aksi cepat)
+    // Toggle publish (aksi cepat) → idealnya hanya admin
     Route::patch('{track}/publish', [TrackController::class, 'togglePublish'])->name('publish');
+
+    // Resource utama (index, create, store, show, edit, update, destroy)
+    Route::resource('/', TrackController::class)->parameters(['' => 'track']);
 });
 
 // =======================

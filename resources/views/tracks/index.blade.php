@@ -15,24 +15,27 @@
 @endpush
 
 @section('content')
+@auth
 <section class="section">
   <div class="card">
     <div class="card-header">
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
         <h5 class="card-title mb-0">Tracks Table</h5>
         <div class="d-flex flex-wrap gap-2">
-          {{-- Bulk import --}}
-          <a href="{{ route('tracks.bulk.import') }}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-upload"></i> Bulk Import
-          </a>
-          {{-- Add track --}}
-          <a href="{{ route('tracks.create') }}" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-circle"></i> Add Track
-          </a>
+          @if(auth()->user()->role == 1)
+            {{-- Bulk import --}}
+            <a href="{{ route('tracks.bulk.import') }}" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-upload"></i> Bulk Import
+            </a>
+            {{-- Add track --}}
+            <a href="{{ route('tracks.create') }}" class="btn btn-primary btn-sm">
+              <i class="bi bi-plus-circle"></i> Add Track
+            </a>
+          @endif
         </div>
       </div>
 
-      {{-- FILTER BAR: q, genre, published, per_page --}}
+      {{-- FILTER BAR --}}
       <form method="GET" action="{{ route('tracks.index') }}" class="mt-3">
         <div class="row g-2 align-items-end filter-row">
           <div class="col-12 col-md">
@@ -94,7 +97,7 @@
               <th>Release Date</th>
               <th>Status</th>
               <th>Actions</th>
-              <th class="d-none">CreatedAt</th> {{-- hidden for sort --}}
+              <th class="d-none">CreatedAt</th>
             </tr>
           </thead>
           <tbody>
@@ -110,7 +113,7 @@
                   <img src="{{ $cover }}" alt="cover" class="rounded" style="width:56px;height:56px;object-fit:cover">
                 </td>
 
-                {{-- Title (link ke show) --}}
+                {{-- Title --}}
                 <td>
                   <div class="fw-semibold">
                     <a href="{{ route('tracks.show', $track) }}">{{ $track->title }}</a>
@@ -118,20 +121,15 @@
                   <small class="text-muted">{{ $track->slug }}</small>
                 </td>
 
-                {{-- Artist --}}
                 <td>{{ $track->artist }}</td>
-
-                {{-- Genre --}}
                 <td>{{ optional($track->genre)->name ?? '-' }}</td>
 
-                {{-- BPM / Key --}}
                 <td>
                   <span>{{ $track->bpm ?? '-' }}</span>
                   <span class="text-muted">/</span>
                   <span>{{ $track->musical_key ?? '-' }}</span>
                 </td>
 
-                {{-- Mood / Tags --}}
                 <td>
                   <div>{{ $track->mood ?? '-' }}</div>
                   @if($track->tags)
@@ -139,7 +137,6 @@
                   @endif
                 </td>
 
-                {{-- Price --}}
                 <td>
                   @if(!is_null($track->price_idr))
                     {{ number_format($track->price_idr, 0, ',', '.') }}
@@ -148,7 +145,7 @@
                   @endif
                 </td>
 
-                {{-- Duration (detik -> mm:ss) --}}
+                {{-- Duration --}}
                 <td>
                   @php
                     $dur = (int)($track->duration_seconds ?? 0);
@@ -158,40 +155,51 @@
                   {{ $dur ? $mm.':'.$ss : '-' }}
                 </td>
 
-                {{-- Release Date --}}
                 <td>{{ $track->release_date?->format('Y-m-d') ?? '-' }}</td>
 
-                {{-- Status + toggle --}}
+                {{-- Status --}}
                 <td>
-                  <button
-                    type="button"
-                    class="btn btn-sm publish-toggle {{ $track->is_published ? 'btn-success' : 'btn-outline-secondary' }}"
-                    data-id="{{ $track->id }}"
-                    data-url="{{ route('tracks.publish', $track) }}"
-                    title="Toggle publish">
-                    {{ $track->is_published ? 'Published' : 'Draft' }}
-                  </button>
+                  @if(auth()->user()->role == 1)
+                    <button
+                      type="button"
+                      class="btn btn-sm publish-toggle {{ $track->is_published ? 'btn-success' : 'btn-outline-secondary' }}"
+                      data-id="{{ $track->id }}"
+                      data-url="{{ route('tracks.publish', $track) }}"
+                      title="Toggle publish">
+                      {{ $track->is_published ? 'Published' : 'Draft' }}
+                    </button>
+                  @else
+                    <span class="badge {{ $track->is_published ? 'bg-success' : 'bg-secondary' }}">
+                      {{ $track->is_published ? 'Published' : 'Draft' }}
+                    </span>
+                  @endif
                 </td>
 
                 {{-- Actions --}}
                 <td>
-                  <div class="d-flex gap-1">
+                  @if(auth()->user()->role == 1)
+                    <div class="d-flex gap-1">
+                      <a href="{{ route('tracks.show', $track) }}" class="btn btn-sm btn-outline-secondary" title="View">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                      <a href="{{ route('tracks.edit', $track) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                      <form action="{{ route('tracks.destroy', $track) }}" method="POST"
+                            onsubmit="return confirm('Delete this track?')">
+                        @csrf @method('DELETE')
+                        <button class="btn btn-sm btn-outline-danger" title="Delete">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+                  @else
                     <a href="{{ route('tracks.show', $track) }}" class="btn btn-sm btn-outline-secondary" title="View">
                       <i class="bi bi-eye"></i>
                     </a>
-                    <a href="{{ route('tracks.edit', $track) }}" class="btn btn-sm btn-outline-primary" title="Edit">
-                      <i class="bi bi-pencil"></i>
-                    </a>
-                    <form action="{{ route('tracks.destroy', $track) }}" method="POST"
-                          onsubmit="return confirm('Delete this track?')">
-                      @csrf @method('DELETE')
-                      <button class="btn btn-sm btn-outline-danger" title="Delete">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </form>
-                  </div>
+                  @endif
 
-                  {{-- Optional: preview audio --}}
+                  {{-- Preview audio --}}
                   @if($track->preview_path && Storage::disk('public')->exists($track->preview_path))
                     <div class="mt-2">
                       <audio src="{{ asset('storage/'.$track->preview_path) }}" controls preload="none" style="width:160px"></audio>
@@ -199,7 +207,6 @@
                   @endif
                 </td>
 
-                {{-- CreatedAt (hidden for sorting) --}}
                 <td class="d-none">{{ optional($track->created_at)->format('Y-m-d H:i:s') }}</td>
               </tr>
             @empty
@@ -213,8 +220,6 @@
         </table>
       </div>
 
-      {{-- Saat pakai DataTables client-side, biasanya pagination Laravel tidak perlu.
-           Kalau mau tetap tampil, hapus d-none di bawah. --}}
       @if(method_exists($tracks, 'links'))
         <div class="mt-3 d-none">
           {{ $tracks->links() }}
@@ -222,6 +227,11 @@
       @endif
     </div>
   </div>
+  @else
+    <div class="alert alert-warning mt-4">
+      <strong>Harus login!</strong> Silakan <a href="{{ route('login') }}">login dulu</a>.
+    </div>
+  @endauth
 </section>
 @endsection
 
@@ -231,18 +241,17 @@
   <script src="{{ asset('assets/extensions/datatables.net-bs5/js/dataTables.bootstrap5.min.js') }}"></script>
   <script>
     $(function () {
-      // DataTables
       $('#tracks-table').DataTable({
-        order: [[11, 'desc']], // sort by hidden CreatedAt desc
+        order: [[11, 'desc']],
         columnDefs: [
-          { targets: [11], visible: false },            // hide CreatedAt
-          { orderable: false, targets: [0, 10] }        // disable sort Cover & Actions
+          { targets: [11], visible: false },
+          { orderable: false, targets: [0, 10] }
         ],
         pageLength: 10,
         lengthMenu: [10, 25, 50, 100]
       });
 
-      // Toggle publish via AJAX (PATCH /tracks/{id}/publish)
+      // Toggle publish via AJAX hanya untuk admin
       $(document).on('click', '.publish-toggle', function () {
         const btn = $(this);
         const url = btn.data('url');

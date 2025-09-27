@@ -4,6 +4,8 @@
 @section('title', 'Tracks – Create | BeatHive')
 
 @section('content')
+
+ @if(auth()->check() && auth()->user()->role == 1)
 <div class="content-wrapper container">
   <div class="page-heading d-flex justify-content-between align-items-center">
     <div>
@@ -246,6 +248,13 @@
         </div>
       </div>
     </div>
+    @else
+    <div class="alert alert-danger mt-5">
+      <h5>Akses ditolak</h5>
+      <p>Halaman ini hanya bisa diakses oleh <strong>Admin</strong>.</p>
+      <a href="{{ route('tracks.index') }}" class="btn btn-outline-primary mt-2">Kembali ke Tracks</a>
+    </div>
+  @endif
   </section>
 </div>
 @endsection
