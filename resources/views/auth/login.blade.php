@@ -12,27 +12,31 @@
   <link rel="stylesheet" href="{{ asset('assets/compiled/css/auth.css') }}">
 
   <style>
-    #auth, #auth .row.h-100 { min-height: 100vh; }
+    #auth, #auth .row.h-100 {
+      min-height: 100vh;
+    }
 
-    /* panel kanan */
+    /* Panel kanan */
     #auth-right {
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: #0f172a; /* background gelap */
+      background-color: #0f172a; /* fallback warna gelap */
+      padding: 20px;
     }
 
     #auth-photo {
-      max-width: 90%;
-      max-height: 90%;
+      width: 100%;
+      max-width: 500px;
+      height: auto;
       object-fit: contain;
-      object-position: center;
-      display: block;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
 
     @media (max-width: 991.98px){
-      #auth-right{ display:none; }
+      #auth-right { display:none; }
     }
   </style>
 </head>
@@ -51,14 +55,19 @@
           <h1 class="auth-title">Log in.</h1>
           <p class="auth-subtitle mb-5">Log in dengan akun yang terdaftar.</p>
 
-          @if(session('error'))
-            <div class="alert alert-danger py-2">{{ session('error') }}</div>
+          {{-- Error handling --}}
+          @if ($errors->any())
+            <div class="alert alert-danger py-2">
+              {{ $errors->first() }}
+            </div>
           @endif
 
           <form method="POST" action="{{ route('login') }}">
             @csrf
             <div class="form-group position-relative has-icon-left mb-4">
-              <input name="email" type="email" class="form-control form-control-xl" placeholder="Email" required autofocus>
+              <input name="email" type="email" class="form-control form-control-xl"
+                     placeholder="Email" required autofocus
+                     value="{{ old('email') }}">
               <div class="form-control-icon"><i class="bi bi-envelope"></i></div>
             </div>
 
@@ -84,7 +93,7 @@
         </div>
       </div>
 
-      <!-- RIGHT (gambar local) -->
+      <!-- RIGHT (gambar lokal cover) -->
       <div class="col-lg-7 d-none d-lg-flex" id="auth-right">
         <img id="auth-photo" src="{{ asset('assets/compiled/jpg/login_cover.jpg') }}" alt="Login Cover">
       </div>
