@@ -48,7 +48,7 @@
               </div>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow-lg" aria-labelledby="topbarUserDropdown">
-              <li><a class="dropdown-item" href="{{ Route::has('account') ? route('account') : '#' }}">My Account</a></li>
+              <li><a class="dropdown-item" href="{{ route('profile.index') }}">My Account</a></li>
               <li><a class="dropdown-item" href="{{ Route::has('settings') ? route('settings') : '#' }}">Settings</a></li>
               <li><hr class="dropdown-divider" /></li>
               <li>
@@ -90,6 +90,13 @@
               </ul>
             </div>
           </div>
+        </li>
+
+        {{-- Genres --}}
+        <li class="menu-item {{ request()->routeIs('genres.*') ? 'active' : '' }}">
+          <a href="{{ route('genres.index') }}" class="menu-link">
+            <span><i class="bi bi-tags-fill"></i> Genres</span>
+          </a>
         </li>
 
         {{-- Upload --}}

@@ -6,6 +6,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
 
 use App\Http\Controllers\GenreController;
+use App\Http\Controllers\ProfileController;
+
+
 
 
 
@@ -78,4 +81,31 @@ Route::fallback(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('genres', GenreController::class);
+});
+
+// =======================
+
+
+
+// Profile
+
+
+// =======================
+
+
+Route::middleware('auth')->group(function () {
+
+
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+
+
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+
+
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
 });
