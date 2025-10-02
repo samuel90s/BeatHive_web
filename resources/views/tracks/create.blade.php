@@ -91,7 +91,6 @@
                     </div>
                   </div>
                 </div>
-
                 {{-- BPM / Key --}}
                 <div class="col-md-6 col-12 mb-3">
                   <div class="form-group has-icon-left">

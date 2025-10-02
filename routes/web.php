@@ -5,6 +5,10 @@ use App\Http\Controllers\TrackController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
 
+use App\Http\Controllers\GenreController;
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -69,4 +73,9 @@ Route::middleware(['auth'])->prefix('tracks')->name('tracks.')->group(function (
 // =======================
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
+});
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('genres', GenreController::class);
 });
