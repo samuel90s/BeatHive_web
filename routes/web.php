@@ -4,9 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrackController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
-
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FaqController;
+use App\Http\Controllers\FaqCategoryController;
 
 
 
@@ -108,4 +109,28 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 
+});
+
+
+Route::middleware(['auth'])->group(function () {
+Route::resource('faqs', FaqController::class);
+Route::patch('faqs/{faq}/toggle', [FaqController::class,'toggle'])->name('faqs.toggle');
+Route::patch('faqs/{faq}/reorder', [FaqController::class,'reorder'])->name('faqs.reorder');
+
+
+Route::resource('faq-categories', FaqCategoryController::class)->except(['show']);
+});
+
+
+// route for public help center
+
+// Publik: semua boleh
+Route::get('/help/faq', [FaqController::class, 'public'])->name('faq.public');
+
+// CRUD: hanya admin
+Route::middleware(['auth','can:admin-only'])->group(function () {
+    Route::resource('faqs', FaqController::class);
+    Route::patch('faqs/{faq}/toggle', [FaqController::class,'toggle'])->name('faqs.toggle');
+    Route::patch('faqs/{faq}/reorder', [FaqController::class,'reorder'])->name('faqs.reorder');
+    Route::resource('faq-categories', FaqCategoryController::class)->except(['show']);
 });
