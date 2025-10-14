@@ -5,7 +5,7 @@
         <p>{{ now()->year }} &copy; BeatHive</p>
       </div>
       <div class="float-end">
-        <p>Crafted with <span class="text-danger"><i class="bi bi-heart"></i></span> by <a href="#">samx</a></p>
+        <p>Crafted with <span class="text-danger"><i class="bi bi-heart"></i></span> by <a href="#">BeatHive</a></p>
       </div>
     </div>
   </div>
