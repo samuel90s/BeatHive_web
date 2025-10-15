@@ -71,71 +71,76 @@ $activeLink = 'is-active';
         </div>
       </li>
       {{-- Sound Effects (mega + 3-level, kolom 10 item) --}}
-@php
-  $routeAllSfx   = Route::has('sfx.index') ? route('sfx.index') : (Route::has('tracks.index') ? route('tracks.index', ['type'=>'sfx']) : '#');
-  $routeSfxGenres = Route::has('sfx.genres') ? route('sfx.genres') : (Route::has('genres.index') ? route('genres.index', ['type'=>'sfx']) : '#');
-  $routeSfxMoods  = Route::has('sfx.moods')  ? route('sfx.moods')  : (Route::has('tracks.index') ? route('tracks.index', ['type'=>'sfx','scope'=>'moods']) : '#');
-  $routeSfxThemes = Route::has('sfx.themes') ? route('sfx.themes') : (Route::has('tracks.index') ? route('tracks.index', ['type'=>'sfx','scope'=>'themes']) : '#');
+      @php
+      $routeAllSfx = Route::has('sfx.index') ? route('sfx.index') : (Route::has('tracks.index') ? route('tracks.index', ['type'=>'sfx']) : '#');
+      $routeSfxGenres = Route::has('sfx.genres') ? route('sfx.genres') : (Route::has('genres.index') ? route('genres.index', ['type'=>'sfx']) : '#');
+      $routeSfxMoods = Route::has('sfx.moods') ? route('sfx.moods') : (Route::has('tracks.index') ? route('tracks.index', ['type'=>'sfx','scope'=>'moods']) : '#');
+      $routeSfxThemes = Route::has('sfx.themes') ? route('sfx.themes') : (Route::has('tracks.index') ? route('tracks.index', ['type'=>'sfx','scope'=>'themes']) : '#');
 
-  $sfxCats = [
-    'Animal'=>'animal','Explosions'=>'explosions','Horror'=>'horror','Impacts'=>'impacts','Multimedia and UI'=>'multimedia-and-ui','Public Places'=>'public-places','Technology'=>'technology',
-    'Bell'=>'bell','Fantasy'=>'fantasy','Hospital'=>'hospital','Industrial'=>'industrial','Musical'=>'musical','Science Fiction'=>'science-fiction','Vehicles'=>'vehicles',
-    'Cartoon'=>'cartoon','Foley'=>'foley','Household'=>'household','Lab'=>'lab','Nature'=>'nature','Sound Design'=>'sound-design','Warfare'=>'warfare',
-    'Emergency'=>'emergency','Food and Drink'=>'food-and-drink','Human'=>'human','Leisure'=>'leisure','Office'=>'office','Sport'=>'sport',
-  ];
+      $sfxCats = [
+      'Animal'=>'animal','Explosions'=>'explosions','Horror'=>'horror','Impacts'=>'impacts','Multimedia and UI'=>'multimedia-and-ui','Public Places'=>'public-places','Technology'=>'technology',
+      'Bell'=>'bell','Fantasy'=>'fantasy','Hospital'=>'hospital','Industrial'=>'industrial','Musical'=>'musical','Science Fiction'=>'science-fiction','Vehicles'=>'vehicles',
+      'Cartoon'=>'cartoon','Foley'=>'foley','Household'=>'household','Lab'=>'lab','Nature'=>'nature','Sound Design'=>'sound-design','Warfare'=>'warfare',
+      'Emergency'=>'emergency','Food and Drink'=>'food-and-drink','Human'=>'human','Leisure'=>'leisure','Office'=>'office','Sport'=>'sport',
+      ];
 
-  // === chunk per 10 item per kolom ===
-  $sfxChunks = array_chunk($sfxCats, 10, true);
-@endphp
+      // === chunk per 10 item per kolom ===
+      $sfxChunks = array_chunk($sfxCats, 10, true);
+      @endphp
 
-<li class="menu-item has-sub">
-  <a href="#" class="menu-link">
-    <span><i class="bi bi-soundwave"></i> Sound Effects</span>
-  </a>
+      <li class="menu-item has-sub">
+        <a href="#" class="menu-link">
+          <span><i class="bi bi-soundwave"></i> Sound Effects</span>
+        </a>
 
-  <div class="submenu">
-    <div class="submenu-group-wrapper">
-      <ul class="submenu-group">
-        {{-- All Sound Effects (punya subsubmenu kolom) --}}
-<li class="submenu-item has-sub">
-  <a href="{{ $routeAllSfx }}" class="submenu-link">All Sound Effects</a>
+        <div class="submenu">
+          <div class="submenu-group-wrapper">
+            <ul class="submenu-group">
+              {{-- All Sound Effects (punya subsubmenu kolom) --}}
+              <li class="submenu-item has-sub">
+                <a href="{{ $routeAllSfx }}" class="submenu-link">All Sound Effects</a>
 
-  {{-- 3rd level: by genre, 10 rows per column --}}
-  <ul class="subsubmenu subsubmenu-columns-10"
-      style="display:grid;
+                {{-- 3rd level: by genre, 10 rows per column --}}
+                <ul class="subsubmenu subsubmenu-columns-10"
+                  style="display:grid;
              grid-auto-flow:column;
              grid-template-rows:repeat(10,auto);
              row-gap:8px; column-gap:28px;
              min-width:640px; /* lebar panel agar muat 2-3 kolom */
              padding-right:8px;">
 
-    @foreach($sfxCats as $label => $slug)
-      <li class="subsubmenu-item" style="break-inside:avoid;">
-        <a href="{{ Route::has('sfx.category')
+                  @foreach($sfxCats as $label => $slug)
+                  <li class="subsubmenu-item" style="break-inside:avoid;">
+                    <a href="{{ Route::has('sfx.category')
                     ? route('sfx.category', $slug)
                     : (Route::has('tracks.index') ? route('tracks.index', ['type'=>'sfx','cat'=>$slug]) : '#') }}"
-           class="subsubmenu-link">{{ $label }}</a>
+                      class="subsubmenu-link">{{ $label }}</a>
+                  </li>
+                  @endforeach
+                </ul>
+              </li>
+
+
+              {{-- Sama seperti Music --}}
+              <li class="submenu-item">
+                <a href="{{ $routeSfxGenres }}" class="submenu-link">Genres</a>
+              </li>
+              <li class="submenu-item">
+                <a href="{{ $routeSfxMoods }}" class="submenu-link">Moods</a>
+              </li>
+              <li class="submenu-item">
+                <a href="{{ $routeSfxThemes }}" class="submenu-link">Themes</a>
+              </li>
+            </ul>
+          </div>
+        </div>
       </li>
-    @endforeach
-  </ul>
-</li>
-
-
-        {{-- Sama seperti Music --}}
-        <li class="submenu-item">
-          <a href="{{ $routeSfxGenres }}" class="submenu-link">Genres</a>
-        </li>
-        <li class="submenu-item">
-          <a href="{{ $routeSfxMoods }}" class="submenu-link">Moods</a>
-        </li>
-        <li class="submenu-item">
-          <a href="{{ $routeSfxThemes }}" class="submenu-link">Themes</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</li>
-
+      {{-- Pricing --}}
+      <li class="menu-item {{ request()->routeIs('pricing') ? $activeLi : '' }}">
+        <a href="{{ route('pricing.index') }}" class="menu-link {{ request()->routeIs('pricing') ? $activeLink : '' }}">
+          <span><i class="bi bi-currency-dollar"></i> Pricing</span>
+        </a>
+      </li>
 
       {{-- Genres (shortcut) --}}
       <li class="menu-item {{ $activeGenres ? $activeLi : '' }}">

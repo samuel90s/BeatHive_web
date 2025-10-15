@@ -8,7 +8,7 @@ use App\Http\Controllers\GenreController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\FaqCategoryController;
-
+use App\Http\Controllers\PricingController;
 
 
 
@@ -134,3 +134,7 @@ Route::middleware(['auth','can:admin-only'])->group(function () {
     Route::patch('faqs/{faq}/reorder', [FaqController::class,'reorder'])->name('faqs.reorder');
     Route::resource('faq-categories', FaqCategoryController::class)->except(['show']);
 });
+
+
+
+Route::get('/pricing', [PricingController::class, 'index'])->name('pricing.index');
