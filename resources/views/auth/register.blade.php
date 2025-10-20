@@ -68,43 +68,56 @@
 
             {{-- Full Name --}}
             <div class="form-group position-relative has-icon-left mb-4">
-                <input type="text" name="name" class="form-control form-control-xl"
-                    placeholder="Full Name" required value="{{ old('name') }}">
-                <div class="form-control-icon"><i class="bi bi-person-badge"></i></div>
+              <input type="text" name="name" class="form-control form-control-xl"
+                     placeholder="Full Name" required value="{{ old('name') }}">
+              <div class="form-control-icon"><i class="bi bi-person-badge"></i></div>
             </div>
 
-            {{-- Username (unik) --}}
+            {{-- Username --}}
             <div class="form-group position-relative has-icon-left mb-4">
-                <input type="text" name="username" class="form-control form-control-xl"
-                    placeholder="Username (letters, numbers, - _)"
-                    required value="{{ old('username') }}">
-                <div class="form-control-icon"><i class="bi bi-person"></i></div>
+              <input type="text" name="username" class="form-control form-control-xl"
+                     placeholder="Username (letters, numbers, - _)" required
+                     value="{{ old('username') }}">
+              <div class="form-control-icon"><i class="bi bi-person"></i></div>
             </div>
 
             {{-- Email --}}
             <div class="form-group position-relative has-icon-left mb-4">
-                <input type="email" name="email" class="form-control form-control-xl"
-                    placeholder="Email" required value="{{ old('email') }}">
-                <div class="form-control-icon"><i class="bi bi-envelope"></i></div>
+              <input type="email" name="email" class="form-control form-control-xl"
+                     placeholder="Email" required value="{{ old('email') }}">
+              <div class="form-control-icon"><i class="bi bi-envelope"></i></div>
             </div>
 
             {{-- Password --}}
             <div class="form-group position-relative has-icon-left mb-4">
-                <input type="password" name="password" class="form-control form-control-xl"
-                    placeholder="Password" required>
-                <div class="form-control-icon"><i class="bi bi-shield-lock"></i></div>
+              <input id="password" type="password" name="password"
+                     class="form-control form-control-xl pe-5" placeholder="Password" required>
+              <div class="form-control-icon"><i class="bi bi-shield-lock"></i></div>
+              <button type="button"
+                      class="btn btn-outline-secondary btn-sm position-absolute top-50 end-0 translate-middle-y me-2"
+                      id="togglePwd" tabindex="-1" aria-label="Show/Hide password">
+                <i class="bi bi-eye" id="eyeOpen"></i>
+                <i class="bi bi-eye-slash d-none" id="eyeClose"></i>
+              </button>
             </div>
 
-            {{-- Confirm --}}
+            {{-- Confirm Password --}}
             <div class="form-group position-relative has-icon-left mb-4">
-                <input type="password" name="password_confirmation" class="form-control form-control-xl"
-                    placeholder="Confirm Password" required>
-                <div class="form-control-icon"><i class="bi bi-shield-lock"></i></div>
+              <input id="password_confirmation" type="password" name="password_confirmation"
+                     class="form-control form-control-xl pe-5" placeholder="Confirm Password" required>
+              <div class="form-control-icon"><i class="bi bi-shield-lock"></i></div>
+              <button type="button"
+                      class="btn btn-outline-secondary btn-sm position-absolute top-50 end-0 translate-middle-y me-2"
+                      id="toggleConfirm" tabindex="-1" aria-label="Show/Hide confirm password">
+                <i class="bi bi-eye" id="eyeOpen2"></i>
+                <i class="bi bi-eye-slash d-none" id="eyeClose2"></i>
+              </button>
             </div>
 
-            <button class="btn btn-primary btn-block btn-lg shadow-lg mt-5 w-100" type="submit">Sign Up</button>
-            </form>
-
+            <button class="btn btn-primary btn-block btn-lg shadow-lg mt-5 w-100" type="submit">
+              Sign Up
+            </button>
+          </form>
 
           <div class="text-center mt-5 text-lg fs-4">
             <p class="text-gray-600">Already have an account?
@@ -120,6 +133,68 @@
       </div>
     </div>
   </div>
+
+  <script>
+    (function(){
+      const form = document.querySelector('form[action="{{ route('register') }}"]');
+      const fields = ['name','username','email','password'];
+      const pwd = document.getElementById('password');
+      const confirm = document.getElementById('password_confirmation');
+      const btn1 = document.getElementById('togglePwd');
+      const btn2 = document.getElementById('toggleConfirm');
+      const eyeO1 = document.getElementById('eyeOpen');
+      const eyeC1 = document.getElementById('eyeClose');
+      const eyeO2 = document.getElementById('eyeOpen2');
+      const eyeC2 = document.getElementById('eyeClose2');
+      const submit = form ? form.querySelector('button[type="submit"]') : null;
+
+      // Smart autofocus
+      for (const f of fields) {
+        const el = document.querySelector(`[name="${f}"]`);
+        if (el && !el.value) { el.focus(); break; }
+      }
+
+      // Show/hide password
+      const toggle = (btn, input, eyeO, eyeC) => {
+        if (!btn || !input) return;
+        btn.addEventListener('click', () => {
+          const isPwd = input.type === 'password';
+          input.type = isPwd ? 'text' : 'password';
+          eyeO.classList.toggle('d-none', !isPwd);
+          eyeC.classList.toggle('d-none', isPwd);
+          input.focus({preventScroll:true});
+        });
+      };
+      toggle(btn1, pwd, eyeO1, eyeC1);
+      toggle(btn2, confirm, eyeO2, eyeC2);
+
+      // CapsLock warning
+      const watchCaps = (input) => {
+        if (!input) return;
+        const detect = (e) => {
+          const on = e.getModifierState && e.getModifierState('CapsLock');
+          input.setCustomValidity(on ? 'Caps Lock is ON' : '');
+          if (on) input.reportValidity();
+        };
+        input.addEventListener('keydown', detect);
+        input.addEventListener('keyup', detect);
+        input.addEventListener('blur', () => input.setCustomValidity(''));
+      };
+      watchCaps(pwd);
+      watchCaps(confirm);
+
+      // Prevent double submit
+      if (form && submit) {
+        let locked = false;
+        form.addEventListener('submit', () => {
+          if (locked) return;
+          locked = true;
+          submit.disabled = true;
+          submit.setAttribute('aria-busy','true');
+        });
+      }
+    })();
+  </script>
 
   <script src="{{ asset('assets/compiled/js/app.js') }}"></script>
 </body>

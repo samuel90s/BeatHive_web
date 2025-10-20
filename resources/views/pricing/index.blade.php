@@ -61,9 +61,9 @@
               {{-- ENTREPRENEUR (center, elevated) --}}
               <div class="col-md-4 px-0 d-flex">
                 <div class="card card-highlighted w-100 h-100 d-flex flex-column shadow-lg position-relative z-3 mt-n4" style="transform: translateY(-6px);">
-                  <div class="card-header text-center py-3">
+                  <div class="card-header text-center py-3 text-white">
                     <h4 class="card-title mb-1">Entrepreneur</h4>
-                    <p class="text-center mb-0">Best for YouTubers & freelancers.</p>
+                    <p class="text-center mb-0 text-white-50">Best for YouTubers & freelancers.</p>
                   </div>
                   <div class="card-body text-center py-3">
                     <h1 class="price text-white mb-3">{{ $fmt($priceCreator) }}</h1>
@@ -84,6 +84,7 @@
                   </div>
                 </div>
               </div>
+
 
               {{-- PROFESSIONAL --}}
               <div class="col-md-4 px-0 d-flex">

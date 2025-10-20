@@ -12,10 +12,9 @@ use Illuminate\Validation\Rules\Password as PasswordRule;
 class AuthController extends Controller
 {
     // ===== Role mapping (int) =====
-    private const ROLE_ADMIN    = 1;
-    private const ROLE_ARTIST   = 2;
-    private const ROLE_CUSTOMER = 3; // default
-    private const ROLE_STUDENT  = 4;
+    private const ROLE_ADMIN  = 1;
+    private const ROLE_AUTHOR = 2;
+    private const ROLE_USER   = 3; // default
 
     // --------- PAGES ---------
     public function showLogin()
@@ -77,19 +76,28 @@ class AuthController extends Controller
                 ->withErrors(['email' => 'Email atau password salah!']);
         }
 
-        Auth::login($user, false);
+        Auth::login($user, $request->boolean('remember'));
+        $request->session()->regenerate(); ; // harden session fixation
 
-        // Optional: catat last_login_at jika kolomnya ada
+        // Catat aktivitas login (kolom opsional)
+        $fills = [];
         if (schema_has_column('users', 'last_login_at')) {
-            $user->forceFill(['last_login_at' => now()])->save();
+            $fills['last_login_at'] = now();
+        }
+        if (schema_has_column('users', 'last_login_ip')) {
+            $fills['last_login_ip'] = $request->ip();
+        }
+        if ($fills) {
+            $user->forceFill($fills)->save();
         }
 
-        $role = (int) ($user->role ?? self::ROLE_CUSTOMER);
+        $role = (int) ($user->role ?? self::ROLE_USER);
+
+        // Arahkan sesuai role (sementara semua ke home)
         switch ($role) {
             case self::ROLE_ADMIN:
-            case self::ROLE_STUDENT:
-            case self::ROLE_ARTIST:
-            case self::ROLE_CUSTOMER:
+            case self::ROLE_AUTHOR:
+            case self::ROLE_USER:
             default:
                 return redirect()->intended(route('home'));
         }
@@ -106,14 +114,23 @@ class AuthController extends Controller
         ]);
 
         $user = new User();
-        $user->name     = $data['name'];
-        $user->username = $data['username'];
-        $user->email    = $data['email'];
-        $user->password = Hash::make($data['password']);
-        $user->role     = self::ROLE_CUSTOMER;
+        $user->name         = $data['name'];
+        $user->username     = $data['username'];
+        $user->email        = $data['email'];
+        $user->password     = Hash::make($data['password']);
+        $user->role         = self::ROLE_USER;  // default: user biasa
+        // isi display_name jika kolomnya ada
+        if (schema_has_column('users', 'display_name')) {
+            $user->display_name = $data['name'];
+        }
+        // status aktif jika kolom ada & belum default
+        if (schema_has_column('users', 'status') && $user->status === null) {
+            $user->status = 1;
+        }
         $user->save();
 
-        Auth::login($user, false);
+        Auth::login($user, $request->boolean('remember'));
+        $request->session()->regenerate(); 
 
         return redirect()->intended(route('home'))->with('success', 'Registrasi berhasil.');
     }
