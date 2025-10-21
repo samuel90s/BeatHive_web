@@ -149,7 +149,15 @@ $activeLink = 'is-active';
           <span><i class="bi bi-tags-fill"></i> Genres</span>
         </a>
       </li>
-
+      {{-- Authors (Admin only) --}}
+        @can('admin-only')
+          <li class="menu-item {{ request()->routeIs('author.*') ? $activeLi : '' }}">
+            <a href="{{ route('author.index') }}"
+              class="menu-link {{ request()->routeIs('author.*') ? $activeLink : '' }}">
+              <span><i class="bi bi-people-fill"></i> Authors</span>
+            </a>
+          </li>
+        @endcan
       {{-- Upload --}}
       <li class="menu-item has-sub {{ $activeUpload ? $activeLi : '' }}">
         <a href="#" class="menu-link {{ $activeUpload ? $activeLink : '' }}">

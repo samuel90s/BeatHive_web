@@ -9,8 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\FaqCategoryController;
 use App\Http\Controllers\PricingController;
-
-
+use App\Http\Controllers\AuthorController;
 
 
 /*
@@ -131,3 +130,10 @@ Route::middleware(['auth','can:admin-only'])->group(function () {
 
 
 Route::get('/pricing', [PricingController::class, 'index'])->name('pricing.index');
+
+
+
+
+Route::middleware(['auth','can:admin-only'])->group(function () {
+    Route::resource('author', AuthorController::class); // author.index -> AuthorController@index
+});
