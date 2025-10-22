@@ -54,6 +54,7 @@ $activeLink = 'is-active';
                   Genres
                 </a>
               </li>
+              
               <li class="submenu-item">
                 <a href="{{ Route::has('albums.index') ? route('albums.index') : '#' }}"
                   class="submenu-link {{ $is('albums.*') ? $activeLink : '' }}">
@@ -141,7 +142,15 @@ $activeLink = 'is-active';
           <span><i class="bi bi-currency-dollar"></i> Pricing</span>
         </a>
       </li>
-
+      {{-- Authors (Admin only) --}}
+@can('admin-only')
+  <li class="menu-item {{ request()->routeIs('author.*') ? $activeLi : '' }}">
+    <a href="{{ route('author.index') }}"
+       class="menu-link {{ request()->routeIs('author.*') ? $activeLink : '' }}">
+      <span><i class="bi bi-people-fill"></i> Authors</span>
+    </a>
+  </li>
+@endcan
       {{-- Genres (shortcut) --}}
       <li class="menu-item {{ $activeGenres ? $activeLi : '' }}">
         <a href="{{ Route::has('genres.index') ? route('genres.index') : '#' }}"
@@ -149,39 +158,119 @@ $activeLink = 'is-active';
           <span><i class="bi bi-tags-fill"></i> Genres</span>
         </a>
       </li>
-      {{-- Authors (Admin only) --}}
+      {{-- ===== Sound Effects (module) ===== --}}
+@php
+  $activeSfx = request()->routeIs('sound_effects.*')
+    || request()->routeIs('sound_categories.*')
+    || request()->routeIs('sound_tags.*')
+    || request()->routeIs('sound_licenses.*');
+@endphp
+
+<li class="menu-item has-sub {{ $activeSfx ? $activeLi : '' }}">
+  <a href="#" class="menu-link {{ $activeSfx ? $activeLink : '' }}">
+    <span><i class="bi bi-soundwave"></i> Sound Effects</span>
+  </a>
+
+  <div class="submenu">
+    <div class="submenu-group-wrapper">
+      <ul class="submenu-group">
+        {{-- Library (Index) --}}
+        <li class="submenu-item">
+          <a href="{{ Route::has('sound_effects.index') ? route('sound_effects.index') : '#' }}"
+             class="submenu-link {{ $is('sound_effects.index') ? $activeLink : '' }}">
+            <i class="bi bi-collection me-1"></i> Library
+          </a>
+        </li>
+
+        {{-- Add --}}
+        <li class="submenu-item">
+          <a href="{{ Route::has('sound_effects.create') ? route('sound_effects.create') : '#' }}"
+             class="submenu-link {{ $is('sound_effects.create') ? $activeLink : '' }}">
+            <i class="bi bi-plus-circle me-1"></i> Add Sound Effect
+          </a>
+        </li>
+
+        {{-- Admin-only taxonomy --}}
         @can('admin-only')
-          <li class="menu-item {{ request()->routeIs('author.*') ? $activeLi : '' }}">
-            <a href="{{ route('author.index') }}"
-              class="menu-link {{ request()->routeIs('author.*') ? $activeLink : '' }}">
-              <span><i class="bi bi-people-fill"></i> Authors</span>
+          <li class="submenu-item">
+            <a href="{{ Route::has('sound_categories.index') ? route('sound_categories.index') : '#' }}"
+               class="submenu-link {{ $is('sound_categories.*') ? $activeLink : '' }}">
+              <i class="bi bi-folder me-1"></i> Categories
+            </a>
+          </li>
+          <li class="submenu-item">
+            <a href="{{ Route::has('sound_tags.index') ? route('sound_tags.index') : '#' }}"
+               class="submenu-link {{ $is('sound_tags.*') ? $activeLink : '' }}">
+              <i class="bi bi-tags me-1"></i> Tags
+            </a>
+          </li>
+          <li class="submenu-item">
+            <a href="{{ Route::has('sound_licenses.index') ? route('sound_licenses.index') : '#' }}"
+               class="submenu-link {{ $is('sound_licenses.*') ? $activeLink : '' }}">
+              <i class="bi bi-award me-1"></i> Licenses
             </a>
           </li>
         @endcan
-      {{-- Upload --}}
-      <li class="menu-item has-sub {{ $activeUpload ? $activeLi : '' }}">
-        <a href="#" class="menu-link {{ $activeUpload ? $activeLink : '' }}">
-          <span><i class="bi bi-cloud-upload-fill"></i> Upload</span>
-        </a>
-        <div class="submenu">
-          <div class="submenu-group-wrapper">
-            <ul class="submenu-group">
-              <li class="submenu-item">
-                <a href="{{ Route::has('tracks.create') ? route('tracks.create') : '#' }}"
-                  class="submenu-link {{ $is('tracks.create') ? $activeLink : '' }}">
-                  Upload Track
-                </a>
-              </li>
-              <li class="submenu-item">
-                <a href="{{ Route::has('tracks.bulk.import') ? route('tracks.bulk.import') : (Route::has('tracks.bulk-import') ? route('tracks.bulk-import') : '#') }}"
-                  class="submenu-link {{ $is('tracks.bulk.*','tracks.bulk-import') ? $activeLink : '' }}">
-                  Bulk Import
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </li>
+      </ul>
+    </div>
+  </div>
+</li>
+<!-- 
+tage -->
+
+{{-- ===== SOUND FX MANAGEMENT ===== --}}
+@php
+  $activeSfxData = request()->routeIs('sound_categories.*')
+    || request()->routeIs('sound_tags.*')
+    || request()->routeIs('sound_licenses.*');
+@endphp
+
+<li class="menu-item has-sub {{ $activeSfxData ? $activeLi : '' }}">
+  <a href="#" class="menu-link {{ $activeSfxData ? $activeLink : '' }}">
+    <span><i class="bi bi-sliders"></i> SFX Data</span>
+  </a>
+
+  <div class="submenu">
+    <div class="submenu-group-wrapper">
+      <ul class="submenu-group">
+
+        {{-- Categories --}}
+        <li class="submenu-item">
+          <a href="{{ Route::has('sound_categories.index') ? route('sound_categories.index') : '#' }}"
+             class="submenu-link {{ $is('sound_categories.*') ? $activeLink : '' }}">
+            <i class="bi bi-folder-fill me-1"></i> Categories
+          </a>
+        </li>
+
+        {{-- Tags --}}
+        <li class="submenu-item">
+          <a href="{{ Route::has('sound_tags.index') ? route('sound_tags.index') : '#' }}"
+             class="submenu-link {{ $is('sound_tags.*') ? $activeLink : '' }}">
+            <i class="bi bi-tags-fill me-1"></i> Tags
+          </a>
+        </li>
+
+        {{-- Licenses --}}
+        <li class="submenu-item">
+          <a href="{{ Route::has('sound_licenses.index') ? route('sound_licenses.index') : '#' }}"
+             class="submenu-link {{ $is('sound_licenses.*') ? $activeLink : '' }}">
+            <i class="bi bi-award-fill me-1"></i> Licenses
+          </a>
+        </li>
+        <!-- sub category? -->
+         <li class="submenu-item">
+          <a href="{{ route('sound_subcategories.index') }}"
+            class="submenu-link {{ $is('sound_subcategories.*') ? $activeLink : '' }}">
+            <i class="bi bi-diagram-3-fill me-1"></i> Subcategories
+          </a>
+        </li>
+
+        
+      </ul>
+    </div>
+  </div>
+</li>
+
 
       {{-- Sales --}}
       <li class="menu-item has-sub {{ $activeSales ? $activeLi : '' }}">
@@ -214,13 +303,13 @@ $activeLink = 'is-active';
         </div>
       </li>
 
-      {{-- Analytics --}}
+      <!-- {{-- Analytics --}}
       <li class="menu-item {{ $activeAnalytics ? $activeLi : '' }}">
         <a href="{{ Route::has('analytics.index') ? route('analytics.index') : (Route::has('analytics') ? route('analytics') : '#') }}"
           class="menu-link {{ $activeAnalytics ? $activeLink : '' }}">
           <span><i class="bi bi-graph-up"></i> Analytics</span>
         </a>
-      </li>
+      </li> -->
 
       {{-- Support --}}
       <li class="menu-item has-sub {{ $activeSupport ? $activeLi : '' }}">

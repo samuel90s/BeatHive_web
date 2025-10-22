@@ -10,6 +10,13 @@ use App\Http\Controllers\FaqController;
 use App\Http\Controllers\FaqCategoryController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\SoundEffectController;
+use App\Http\Controllers\SoundCategoryController;
+use App\Http\Controllers\SoundTagController;
+use App\Http\Controllers\SoundLicenseController;
+use App\Http\Controllers\SoundSubcategoryController;
+
+
 
 
 /*
@@ -136,4 +143,25 @@ Route::get('/pricing', [PricingController::class, 'index'])->name('pricing.index
 
 Route::middleware(['auth','can:admin-only'])->group(function () {
     Route::resource('author', AuthorController::class); // author.index -> AuthorController@index
+});
+
+
+Route::middleware(['auth'])->group(function() {
+    Route::resource('sound_effects', SoundEffectController::class);
+});
+
+Route::middleware(['auth'])->group(function() {
+    Route::resource('sound_categories', SoundCategoryController::class);
+    Route::resource('sound_tags', SoundTagController::class);
+    Route::resource('sound_licenses', SoundLicenseController::class);
+});
+
+Route::middleware(['auth'])->group(function () {
+    // CRUD utama
+    Route::resource('sound_subcategories', SoundSubcategoryController::class);
+    // route tambahan untuk filter subcategory by category (digunakan di form SoundEffect)
+    Route::get('sound_subcategories/by-category/{category}', 
+        [SoundSubcategoryController::class, 'byCategory']
+    )->name('sound_subcategories.byCategory');
+
 });
