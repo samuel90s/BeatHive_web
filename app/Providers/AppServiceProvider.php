@@ -5,7 +5,8 @@ namespace App\Providers;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-
+use App\Models\SoundEffect;
+use App\Policies\SoundEffectPolicy;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -28,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('admin-only', function (User $user) {
             return (int) ($user->role ?? 0) === 1;
         });
-
+        
         /**
          * (Opsional) Superadmin bypass semua Gate.
          * Aktifkan kalau kamu punya role khusus, mis. 99.
@@ -40,4 +41,7 @@ class AppServiceProvider extends ServiceProvider
         //     return null;
         // });
     }
+    protected $policies = [
+        SoundEffect::class => SoundEffectPolicy::class,
+    ];
 }

@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Artisan;
 
 class SoundEffectController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth'); // pastikan auth
+        $this->authorizeResource(\App\Models\SoundEffect::class, 'sound_effect');
+    }
     public function index()
     {
         $sounds = SoundEffect::with('author', 'category')->latest()->paginate(10);
