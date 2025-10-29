@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SoundSubcategory extends Model
 {
+    protected $table = 'sound_subcategories';
     protected $fillable = ['category_id', 'name', 'slug'];
 
     public function category()

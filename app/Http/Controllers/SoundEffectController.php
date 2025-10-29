@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
+use App\Models\SoundCategory;
+use App\Models\SoundSubcategory;
+
+
 
 class SoundEffectController extends Controller
 {
@@ -19,8 +23,28 @@ class SoundEffectController extends Controller
     }
     public function index()
     {
-        $sounds = SoundEffect::with('author', 'category')->latest()->paginate(10);
-        return view('sound_effects.index', compact('sounds'));
+        // Halaman GRID kategori (landing)
+        $categories = SoundCategory::query()
+            ->withCount('soundEffects')   // boleh dicabut kalau belum perlu
+            ->orderBy('name')->get();
+
+        $subGroups = SoundSubcategory::query()
+            ->with('category:id,name')
+            ->orderBy('name')->get()
+            ->groupBy('category_id');
+
+        return view('sound_effects.index', [
+            'categories' => $categories,
+            'subGroups'  => $subGroups,
+            'q'          => '',
+        ]);
+    }
+
+    public function list()
+    {
+        // Halaman LIST SFX (yang lama, ada player)
+        $sounds = SoundEffect::with('author','category')->latest()->paginate(10);
+        return view('sound_effects.list', compact('sounds'));
     }
 
     public function create()
@@ -167,6 +191,28 @@ public function store(Request $request)
     {
         $sound_effect->delete();
         return redirect()->route('sound_effects.index')->with('success', 'Sound Effect deleted successfully!');
+    }
+    
+    public function browse(Request $request)
+    {
+        $q = trim($request->get('q', '')); // pencarian
+        $categories = \App\Models\SoundCategory::query()
+            ->withCount('soundEffects')        // kalau sudah ada relasi
+            ->orderBy('name')
+            ->get();
+
+        // subkategori dikelompokkan per kategori
+        $subGroups = \App\Models\SoundSubcategory::query()
+            ->with('category:id,name')
+            ->orderBy('name')
+            ->get()
+            ->groupBy('category_id');
+
+        return view('sound_effects.browse', [
+            'categories' => $categories,
+            'subGroups'  => $subGroups,
+            'q'          => $q,
+        ]);
     }
 
 }

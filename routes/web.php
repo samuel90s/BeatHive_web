@@ -146,8 +146,19 @@ Route::middleware(['auth','can:admin-only'])->group(function () {
 });
 
 
-Route::middleware(['auth'])->group(function() {
-    Route::resource('sound_effects', SoundEffectController::class);
+
+Route::middleware('auth')->group(function () {
+    Route::get('/sound-effects/browse', [SoundEffectController::class, 'browse'])
+        ->name('sound_effects.browse');
+
+    // kalau grid kategori kamu taruh di index:
+    Route::get('/sound-effects', [SoundEffectController::class, 'index'])
+        ->name('sound_effects.index');
+
+    Route::get('/sound-effects/list', [SoundEffectController::class, 'list'])
+        ->name('sound_effects.list');
+
+    Route::resource('sound_effects', SoundEffectController::class)->except(['index']);
 });
 
 Route::middleware(['auth'])->group(function() {
@@ -165,3 +176,4 @@ Route::middleware(['auth'])->group(function () {
     )->name('sound_subcategories.byCategory');
 
 });
+
