@@ -14,7 +14,11 @@ class SoundSubcategoryController extends Controller
      */
     public function index()
     {
-        $subs = SoundSubcategory::with('category')->latest()->paginate(15);
+        $subs = SoundSubcategory::with('category')   // untuk akses $sub->category
+            ->withCount('soundEffects')              // butuh relasi soundEffects() di model
+            ->orderBy('name')
+            ->paginate(15);
+
         return view('sound_subcategories.index', compact('subs'));
     }
 
@@ -24,6 +28,7 @@ class SoundSubcategoryController extends Controller
     public function create()
     {
         $categories = SoundCategory::orderBy('name')->get();
+
         return view('sound_subcategories.create', compact('categories'));
     }
 
@@ -33,8 +38,8 @@ class SoundSubcategoryController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'category_id' => 'required|exists:sound_categories,id',
-            'name' => 'required|max:100|unique:sound_subcategories,name',
+            'category_id' => ['required', 'exists:sound_categories,id'],
+            'name'        => ['required', 'string', 'max:100', 'unique:sound_subcategories,name'],
         ]);
 
         $data['slug'] = Str::slug($data['name']);
@@ -52,6 +57,7 @@ class SoundSubcategoryController extends Controller
     public function edit(SoundSubcategory $sound_subcategory)
     {
         $categories = SoundCategory::orderBy('name')->get();
+
         return view('sound_subcategories.edit', compact('sound_subcategory', 'categories'));
     }
 
@@ -61,8 +67,8 @@ class SoundSubcategoryController extends Controller
     public function update(Request $request, SoundSubcategory $sound_subcategory)
     {
         $data = $request->validate([
-            'category_id' => 'required|exists:sound_categories,id',
-            'name' => 'required|max:100|unique:sound_subcategories,name,' . $sound_subcategory->id,
+            'category_id' => ['required', 'exists:sound_categories,id'],
+            'name'        => ['required', 'string', 'max:100', 'unique:sound_subcategories,name,' . $sound_subcategory->id],
         ]);
 
         $data['slug'] = Str::slug($data['name']);
@@ -92,7 +98,10 @@ class SoundSubcategoryController extends Controller
     public function byCategory(SoundCategory $category)
     {
         return response()->json(
-            $category->subcategories()->select('id', 'name')->orderBy('name')->get()
+            $category->subcategories()
+                ->select('id', 'name')
+                ->orderBy('name')
+                ->get()
         );
     }
 }

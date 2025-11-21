@@ -42,6 +42,7 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name'          => ['required', 'string', 'max:100'],
+            'display_name' => ['nullable', 'string', 'max:100'],
             'username'      => ['nullable', 'alpha_dash', 'min:3', 'max:32', 'unique:users,username,' . $user->id],
             'email'         => ['required', 'email', 'max:150', 'unique:users,email,' . $user->id],
             'phone'         => ['nullable', 'string', 'max:20'],
@@ -49,31 +50,47 @@ class ProfileController extends Controller
             'social_links'  => ['nullable', 'array'],
             'avatar'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_avatar' => ['nullable', 'boolean'],
+            
         ]);
 
         DB::beginTransaction();
         try {
-            // Jika email berubah, reset verifikasi
+            // 1. Email berubah -> reset verifikasi
             if ($validated['email'] !== $user->email) {
-                $validated['email_verified_at'] = null;
+                $user->email_verified_at = null;
             }
 
-            // Handle social links
-            if (isset($validated['social_links'])) {
-                $user->social_links = $validated['social_links']; // otomatis cast ke JSON
+            // 2. Social links (disimpan sebagai JSON/array di kolom user->social_links)
+            if (array_key_exists('social_links', $validated)) {
+                $user->social_links = $validated['social_links'];
                 unset($validated['social_links']);
             }
 
-            // Handle avatar upload atau hapus
+            // 3. Avatar: hapus / ganti file
             if ($request->boolean('remove_avatar')) {
+                // hapus file lama kalau ada
+                if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
                 $user->avatar = null;
             }
+
             if ($request->hasFile('avatar')) {
-                $path = $request->file('avatar')->store('avatars', 'public');
+                // hapus file lama dulu
+                if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+
+                $path = $request->file('avatar')->store('avatars', 'public'); // avatars/xxx.png
                 $user->avatar = $path;
             }
 
-            $user->fill($validated)->save();
+            // avatar & remove_avatar jangan ikut fill()
+            unset($validated['avatar'], $validated['remove_avatar']);
+
+            // 4. Isi field lain dari $validated
+            $user->fill($validated);
+            $user->save();
 
             DB::commit();
             return Redirect::route('profile.index')->with('success', 'Profile updated successfully.');

@@ -9,9 +9,22 @@ class SoundLicense extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','description','price'];
+    protected $fillable = [
+        'name',
+        'description',
+        'price',
+        'highlight',
+        'features',
+    ];
 
-    public function soundEffects() {
+    protected $casts = [
+        'price'     => 'decimal:2',
+        'highlight' => 'boolean',
+        'features'  => 'array', // otomatis JSON ⇆ array
+    ];
+
+    public function soundEffects()
+    {
         return $this->hasMany(SoundEffect::class, 'license_type_id');
     }
 }

@@ -25,9 +25,9 @@ class SoundEffect extends Model
     ];
 
     // === Relationships ===
-    public function category() {
-        return $this->belongsTo(SoundCategory::class);
-    }
+    // public function category() {
+    //     return $this->belongsTo(SoundCategory::class);
+    // }
 
     public function license() {
         return $this->belongsTo(SoundLicense::class, 'license_type_id');
@@ -45,5 +45,15 @@ class SoundEffect extends Model
     public static function generateSlug($title)
     {
         return Str::slug($title) . '-' . substr(sha1($title . now()), 0, 6);
+    }
+    public function category()
+    {
+        return $this->belongsTo(SoundCategory::class, 'category_id');
+    }
+
+    public function subcategory()
+    {
+        // pastikan nama kolomnya benar: subcategory_id
+        return $this->belongsTo(SoundSubcategory::class, 'subcategory_id');
     }
 }

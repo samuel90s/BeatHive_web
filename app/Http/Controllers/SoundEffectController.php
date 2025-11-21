@@ -194,26 +194,90 @@ public function store(Request $request)
     }
     
     public function browse(Request $request)
-    {
-        $q = trim($request->get('q', '')); // pencarian
-        $categories = \App\Models\SoundCategory::query()
-            ->withCount('soundEffects')        // kalau sudah ada relasi
-            ->orderBy('name')
-            ->get();
+{
+    $q          = trim($request->get('q', ''));
+    $categoryId = $request->get('category');
+    $subId      = $request->get('subcategory');
+    $sort       = $request->get('sort', 'popular');
 
-        // subkategori dikelompokkan per kategori
-        $subGroups = \App\Models\SoundSubcategory::query()
-            ->with('category:id,name')
-            ->orderBy('name')
-            ->get()
-            ->groupBy('category_id');
+    // Data umum untuk index/footer, kalau nanti mau dipakai
+    $categories = SoundCategory::query()
+        ->withCount('soundEffects')
+        ->orderBy('name')
+        ->get();
 
-        return view('sound_effects.browse', [
-            'categories' => $categories,
-            'subGroups'  => $subGroups,
-            'q'          => $q,
-        ]);
+    $subGroups = SoundSubcategory::query()
+        ->with('category:id,name')
+        ->orderBy('name')
+        ->get()
+        ->groupBy('category_id');
+
+    $sounds             = null;
+    $currentCategory    = null;
+    $currentSubcategory = null;
+
+    if ($categoryId) {
+        $currentCategory = SoundCategory::findOrFail($categoryId);
     }
+
+    if ($subId) {
+        $currentSubcategory = SoundSubcategory::with('category')->findOrFail($subId);
+
+        if (!$currentCategory) {
+            $currentCategory = $currentSubcategory->category;
+        }
+    }
+
+    // Kalau ada filter (category / subcategory / search), ambil list sound
+    if ($categoryId || $subId || $q !== '') {
+        $query = SoundEffect::query()
+            ->with(['category', 'subcategory']);
+
+        if ($currentCategory) {
+            $query->where('category_id', $currentCategory->id);
+        }
+
+        if ($currentSubcategory) {
+            $query->where('subcategory_id', $currentSubcategory->id);
+        }
+
+        if ($q !== '') {
+            $query->where(function ($qq) use ($q) {
+                $qq->where('name', 'like', "%{$q}%")
+                   ->orWhere('title', 'like', "%{$q}%")
+                   ->orWhere('description', 'like', "%{$q}%");
+            });
+        }
+
+        // sorting sederhana
+        switch ($sort) {
+            case 'newest':
+                $query->orderByDesc('created_at');
+                break;
+            case 'shortest':
+                $query->orderBy('duration'); // pastikan ada kolom duration (detik)
+                break;
+            case 'longest':
+                $query->orderByDesc('duration');
+                break;
+            case 'popular':
+            default:
+                $query->orderByDesc('created_at');
+                break;
+        }
+
+        $sounds = $query->paginate(20);
+    }
+
+    return view('sound_effects.browse', [
+        'categories'         => $categories,
+        'subGroups'          => $subGroups,
+        'q'                  => $q,
+        'sounds'             => $sounds,
+        'currentCategory'    => $currentCategory,
+        'currentSubcategory' => $currentSubcategory,
+    ]);
+}
 
 }
 
