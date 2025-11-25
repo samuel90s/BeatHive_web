@@ -10,6 +10,8 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
+
 
 class ProfileController extends Controller
 {
