@@ -136,7 +136,20 @@ Route::middleware(['auth','can:admin-only'])->group(function () {
 
 
 
+//Payment
 Route::get('/pricing', [PricingController::class, 'index'])->name('pricing.index');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/checkout', [PricingController::class, 'checkout'])->name('checkout');
+    Route::get('/payment/finish', [PricingController::class, 'paymentFinish'])->name('payment.finish');
+    Route::get('/payment/success', [PricingController::class, 'paymentSuccess'])->name('payment.success');
+    Route::get('/payment/pending', [PricingController::class, 'paymentPending'])->name('payment.pending');
+    Route::get('/payment/error', [PricingController::class, 'paymentError'])->name('payment.error');
+});
+
+// Webhook route - tanpa CSRF protection
+Route::post('/payment/notification', [PricingController::class, 'paymentNotification']);
+
 
 
 
