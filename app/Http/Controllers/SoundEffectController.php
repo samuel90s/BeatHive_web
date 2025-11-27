@@ -192,7 +192,20 @@ public function store(Request $request)
         $sound_effect->delete();
         return redirect()->route('sound_effects.index')->with('success', 'Sound Effect deleted successfully!');
     }
-    
+    public function show(SoundEffect $sound_effect)
+{
+    // similar tracks (contoh: kategori sama, beda id)
+    $similar = SoundEffect::query()
+        ->where('id', '!=', $sound_effect->id)
+        ->where('category_id', $sound_effect->category_id)
+        ->limit(6)
+        ->get();
+
+    return view('sound_effects.show', [
+        'sound'   => $sound_effect,
+        'similar' => $similar,
+    ]);
+}
     public function browse(Request $request)
 {
     $q          = trim($request->get('q', ''));
