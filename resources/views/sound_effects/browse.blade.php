@@ -87,7 +87,7 @@
       </div>
 
       <div class="d-flex align-items-center gap-2">
-        {{-- sorting variations --}}
+        {{-- variations (dummy) --}}
         <div class="dropdown">
           <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
             Variations
@@ -130,24 +130,51 @@
       @if($hasSounds)
         @foreach($sounds as $sound)
           @php
-            $trackTitle = $sound->name ?? $sound->title ?? 'Untitled sound';
-            $catName    = optional($sound->category)->name ?? ($bannerCat->name ?? 'Sound');
-            $tagName    = optional($sound->subcategory)->name ?? null;
-            $duration   = $sound->duration ?? null; // misal "0:37"
+              $trackTitle = $sound->name ?? $sound->title ?? 'Untitled sound';
+              $catName    = optional($sound->category)->name ?? ($bannerCat->name ?? 'Sound');
+              $tagName    = optional($sound->subcategory)->name ?? null;
+
+              // durasi (pakai duration_seconds, fallback ke kolom duration kalau ada)
+              $duration   = '—:—';
+              if (!is_null($sound->duration_seconds ?? null)) {
+                  $sec = (int) $sound->duration_seconds;
+                  $m   = floor($sec / 60);
+                  $s   = $sec % 60;
+                  $duration = sprintf('%d:%02d', $m, $s);
+              } elseif (!empty($sound->duration)) {
+                  $duration = $sound->duration;
+              }
+
+              // audio & waveform
+              $previewPath = $sound->preview_path ?: $sound->file_path;
+              $previewUrl  = $previewPath ? asset($previewPath) : null;
+              $waveUrl     = $sound->waveform_image ? asset($sound->waveform_image) : null;
+              $mime        = $sound->mime_type ?? 'audio/mpeg';
           @endphp
 
           <div class="sfx-row px-3 px-md-4 py-2">
-            {{-- Left: thumb + title --}}
+            {{-- Left: tombol play + title --}}
             <div class="d-flex align-items-center gap-3 flex-grow-1">
 
-              <div class="sfx-thumb">
+              {{-- Play button --}}
+              <button type="button"
+                      class="btn btn-icon btn-sm btn-ghost sfx-play-btn"
+                      data-audio-src="{{ $previewUrl }}"
+                      data-audio-type="{{ $mime }}">
+                <i class="bi bi-play-fill"></i>
+              </button>
+
+              {{-- Thumb kecil --}}
+              <div class="sfx-thumb d-none d-sm-flex">
                 <div class="sfx-thumb-inner">
                   <span></span><span></span><span></span>
                 </div>
               </div>
 
+              {{-- Title + category --}}
               <div class="flex-grow-1">
-                <a href="{{ route('sound_effects.show', $sound->id) ?? '#' }}"
+                {{-- Judul → halaman detail --}}
+                <a href="{{ route('sound_effects.show', $sound->id) }}"
                    class="fw-semibold text-decoration-none text-light d-block text-truncate">
                   {{ $trackTitle }}
                 </a>
@@ -159,9 +186,13 @@
 
             {{-- Waveform + duration (desktop) --}}
             <div class="d-none d-md-flex align-items-center col-waveform">
-              <div class="sfx-waveform me-2"></div>
+              <div class="sfx-waveform me-2">
+                @if($waveUrl)
+                  <img src="{{ $waveUrl }}" alt="waveform" class="img-fluid">
+                @endif
+              </div>
               <div class="small text-muted">
-                {{ $duration ?? '—:—' }}
+                {{ $duration }}
               </div>
             </div>
 
@@ -187,9 +218,13 @@
 
             {{-- Mobile row: waveform + duration --}}
             <div class="d-flex d-md-none align-items-center mt-2 ms-5 w-100">
-              <div class="sfx-waveform me-2"></div>
+              <div class="sfx-waveform me-2">
+                @if($waveUrl)
+                  <img src="{{ $waveUrl }}" alt="waveform" class="img-fluid">
+                @endif
+              </div>
               <div class="small text-muted ms-auto">
-                {{ $duration ?? '—:—' }}
+                {{ $duration }}
               </div>
             </div>
           </div>
@@ -256,16 +291,17 @@
   }
   .sfx-row {
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) 1fr 0.6fr auto;
+    grid-template-columns: minmax(0, 1.8fr) 1.1fr 0.6fr auto;
     column-gap: 1rem;
     align-items: center;
     border-bottom: 1px solid rgba(255,255,255,.04);
+    min-height: 64px;
   }
   .sfx-row:hover {
     background: rgba(255,255,255,.02);
   }
 
-  .col-waveform { min-width: 180px; }
+  .col-waveform { min-width: 200px; }
   .col-tag      { min-width: 120px; }
   .col-actions  { min-width: 120px; }
 
@@ -281,8 +317,8 @@
 
   /* Thumb kecil di kiri title */
   .sfx-thumb {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
     border-radius: .35rem;
     background: rgba(255,255,255,.08);
     display: flex;
@@ -306,12 +342,23 @@
   .sfx-thumb-inner span:nth-child(1),
   .sfx-thumb-inner span:nth-child(3) { height: 60%; }
 
-  /* Waveform dummy */
+  /* Waveform container */
   .sfx-waveform {
     flex: 1 1 auto;
-    height: 24px;
+    height: 32px;                 /* kecil, mirip Epidemic */
     border-radius: .5rem;
-    background: linear-gradient(90deg, rgba(255,255,255,.1), rgba(255,255,255,.03));
+    overflow: hidden;
+    background: rgba(255,255,255,.02);
+  }
+
+  /* Waveform image styling */
+  .sfx-waveform img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* bikin waveform merah jadi abu-abu soft */
+    filter: grayscale(1) brightness(1.3) contrast(1.15);
+    opacity: .9;
   }
 
   /* Icon buttons */
@@ -333,5 +380,63 @@
     justify-content: center;
     border-radius: 999px;
   }
+  .sfx-play-btn.is-playing i {
+    color: #fff;
+  }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const player = new Audio();
+  let currentBtn = null;
+
+  const buttons = document.querySelectorAll('.sfx-play-btn');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const src  = btn.dataset.audioSrc;
+      const type = btn.dataset.audioType || 'audio/mpeg';
+      if (!src) return;
+
+      // klik tombol yang sama → toggle play/pause
+      if (currentBtn === btn) {
+        if (player.paused) {
+          player.play();
+          btn.classList.add('is-playing');
+          btn.querySelector('i').className = 'bi bi-pause-fill';
+        } else {
+          player.pause();
+          btn.classList.remove('is-playing');
+          btn.querySelector('i').className = 'bi bi-play-fill';
+        }
+        return;
+      }
+
+      // stop tombol sebelumnya
+      if (currentBtn) {
+        currentBtn.classList.remove('is-playing');
+        currentBtn.querySelector('i').className = 'bi bi-play-fill';
+      }
+
+      // mainkan yang baru
+      currentBtn = btn;
+      player.src = src;
+      player.type = type;
+      player.play();
+
+      btn.classList.add('is-playing');
+      btn.querySelector('i').className = 'bi bi-pause-fill';
+    });
+  });
+
+  player.addEventListener('ended', () => {
+    if (currentBtn) {
+      currentBtn.classList.remove('is-playing');
+      currentBtn.querySelector('i').className = 'bi bi-play-fill';
+    }
+  });
+});
+</script>
 @endpush

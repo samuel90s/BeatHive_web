@@ -11,59 +11,55 @@ class SoundEffectPolicy
     use HandlesAuthorization;
 
     /**
-     * Jika user admin -> ijinkan semua
-     * (sebelum checks lain)
+     * Admin: full akses semua ability.
      */
     public function before(User $user, $ability)
     {
-        // Asumsi: role == 1 => admin. Jika beda, ubah kondisi ini.
-        if ((int)$user->role === 1) {
+        // role 1 = admin
+        if ((int) $user->role === 1) {
             return true;
         }
     }
 
     /**
-     * Siapa boleh melihat index/list
-     * Kita batasi: admin (via before) atau author-role (role == 2) saja
+     * LIST / LIBRARY
+     * Semua user login boleh lihat library.
      */
-    public function viewAny(User $user)
+    public function viewAny(User $user): bool
     {
-        // Asumsi: role == 2 => author (uploader). Ubah sesuai aplikasi kamu.
-        return in_array((int)$user->role, [1,2]);
+        return true; // udah lewat middleware auth
     }
 
     /**
-     * Lihat single item (boleh semua authenticated user jika mau,
-     * atau batasi ke admin/author)
+     * DETAIL 1 SOUND EFFECT
+     * Semua user login boleh lihat detail.
      */
-    public function view(User $user, SoundEffect $sound)
+    public function view(User $user, SoundEffect $sound): bool
     {
-        return in_array((int)$user->role, [1,2]) || $user->id === $sound->creator_user_id;
+        return true;
     }
 
     /**
-     * siapa boleh membuat: authenticated author/admin
+     * CREATE: hanya admin + author.
      */
-    public function create(User $user)
+    public function create(User $user): bool
     {
-        return in_array((int)$user->role, [1,2]);
+        return in_array((int) $user->role, [1, 2]);
     }
 
     /**
-     * update: hanya pemilik (creator) atau admin (admin ditangani by before)
+     * UPDATE: hanya creator (admin di-handle oleh before()).
      */
-    public function update(User $user, SoundEffect $sound)
+    public function update(User $user, SoundEffect $sound): bool
     {
         return $user->id === $sound->creator_user_id;
     }
 
     /**
-     * delete: hanya pemilik (creator) atau admin (admin ditangani by before)
+     * DELETE: hanya creator (admin di-handle oleh before()).
      */
-    public function delete(User $user, SoundEffect $sound)
+    public function delete(User $user, SoundEffect $sound): bool
     {
         return $user->id === $sound->creator_user_id;
     }
-
-    // optional: restore/forceDelete jika butuh
 }
