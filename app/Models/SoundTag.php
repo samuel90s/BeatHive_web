@@ -9,9 +9,14 @@ class SoundTag extends Model
 {
     use HasFactory;
 
+    protected $table = 'sound_tags';
+
     protected $fillable = ['name','slug'];
 
-    public function soundEffects() {
-        return $this->belongsToMany(SoundEffect::class, 'sound_effect_tag');
+    public function soundEffects()
+    {
+        // foreignPivotKey   = tag_id
+        // relatedPivotKey   = sound_effect_id
+        return $this->belongsToMany(SoundEffect::class, 'sound_effect_tag', 'tag_id', 'sound_effect_id');
     }
 }
