@@ -193,6 +193,37 @@ $activeLink = 'is-active';
         </li>
       @endif
       {{-- Authors (Admin only) --}}
+      {{-- SoundScoring (dummy) --}}
+<li class="submenu-item">
+  <a href="#"
+     class="submenu-link">
+    <i class="bi bi-magic me-1"></i> SoundScoring
+  </a>
+</li>
+
+{{-- Ambience (dummy) --}}
+<li class="submenu-item">
+  <a href="#"
+     class="submenu-link">
+    <i class="bi bi-cloud-fog2-fill me-1"></i> Ambience
+  </a>
+</li>
+
+{{-- Soundscape (dummy) --}}
+<li class="submenu-item">
+  <a href="#"
+     class="submenu-link">
+    <i class="bi bi-brush-fill me-1"></i> Soundscape
+  </a>
+</li>
+
+{{-- Foley (dummy) --}}
+<li class="submenu-item">
+  <a href="#"
+     class="submenu-link">
+    <i class="bi bi-volume-up-fill me-1"></i> Foley
+  </a>
+</li>
 
 
 
