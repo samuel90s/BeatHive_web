@@ -16,164 +16,232 @@ use App\Http\Controllers\SoundTagController;
 use App\Http\Controllers\SoundLicenseController;
 use App\Http\Controllers\SoundSubcategoryController;
 
-
-
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
 
-// =======================
-// Landing page
-// =======================
+
+// ============================================================
+// LANDING PAGE
+// ============================================================
+
 Route::get('/', [DashboardController::class, 'index'])->name('home');
 
-// =======================
-// Auth (Login, Register, Forgot, Reset, Logout)
-// =======================
+
+// ============================================================
+// AUTH ROUTES
+// ============================================================
+
 Route::middleware('guest')->group(function () {
-    // Login
+
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
-    // Register
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
-    // Forgot password
     Route::get('/forgot-password', [AuthController::class, 'showForgot'])->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
 
-    // Reset password
     Route::get('/reset-password/{token}', function (string $token) {
         return view('auth.reset-password', ['token' => $token]);
     })->name('password.reset');
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+        ->name('password.update');
+
 });
 
-// Logout
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
-// =======================
-// Tracks group (custom endpoints + CRUD)
-// =======================
+
+
+// ============================================================
+// TRACKS
+// ============================================================
+
 Route::redirect('/tracks_create', '/tracks/create', 301);
 
-Route::middleware(['auth'])->prefix('tracks')->name('tracks.')->group(function () {
-    // Quick search JSON (untuk Select2/autocomplete)
-    Route::get('search/json', [TrackController::class, 'search'])->name('search');
+Route::middleware(['auth'])
+    ->prefix('tracks')
+    ->name('tracks.')
+    ->group(function () {
 
-    // Bulk import (halaman + submit) → hanya admin
-    Route::get('bulk-import', [TrackController::class, 'bulkImport'])->name('bulk.import');
-    Route::post('bulk-import', [TrackController::class, 'bulkImportStore'])->name('bulk.import.store');
+        Route::get('search/json', [TrackController::class, 'search'])->name('search');
 
-    // Toggle publish (aksi cepat) → hanya admin
-    Route::patch('{track}/publish', [TrackController::class, 'togglePublish'])->name('publish');
+        Route::get('bulk-import', [TrackController::class, 'bulkImport'])->name('bulk.import');
+        Route::post('bulk-import', [TrackController::class, 'bulkImportStore'])->name('bulk.import.store');
 
-    // Resource utama (index, create, store, show, edit, update, destroy)
-    Route::resource('/', TrackController::class)->parameters(['' => 'track']);
+        Route::patch('{track}/publish', [TrackController::class, 'togglePublish'])->name('publish');
+
+        Route::resource('/', TrackController::class)->parameters(['' => 'track']);
+
 });
 
-// =======================
-// Fallback 404
-// =======================
-Route::fallback(function () {
-    return response()->view('errors.404', [], 404);
-});
 
+
+// ============================================================
+// GENRES
+// ============================================================
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('genres', GenreController::class);
 });
 
-// =======================
 
 
-
-// Profile
-
-
-// =======================
-
+// ============================================================
+// PROFILE
+// ============================================================
 
 Route::middleware('auth')->group(function () {
-    Route::match(['put','patch'], '/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');  // ⬅️ kini terima PUT & PATCH
-    // lainnya tetap:
+
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    Route::match(['put','patch'], '/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
+
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
+
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])
+        ->name('profile.password.update');
+
 });
 
 
-Route::middleware(['auth'])->group(function () {
-Route::resource('faqs', FaqController::class);
-Route::patch('faqs/{faq}/toggle', [FaqController::class,'toggle'])->name('faqs.toggle');
-Route::patch('faqs/{faq}/reorder', [FaqController::class,'reorder'])->name('faqs.reorder');
 
+// ============================================================
+// FAQ SYSTEM
+// ============================================================
 
-Route::resource('faq-categories', FaqCategoryController::class)->except(['show']);
-});
+// Public FAQ
+Route::get('/help/faq', [FaqController::class, 'public'])
+    ->name('faq.public');
 
-
-// route for public help center
-
-// Publik: semua boleh
-Route::get('/help/faq', [FaqController::class, 'public'])->name('faq.public');
-
-// CRUD: hanya admin
+// Admin FAQ CRUD
 Route::middleware(['auth','can:admin-only'])->group(function () {
+
     Route::resource('faqs', FaqController::class);
-    Route::patch('faqs/{faq}/toggle', [FaqController::class,'toggle'])->name('faqs.toggle');
-    Route::patch('faqs/{faq}/reorder', [FaqController::class,'reorder'])->name('faqs.reorder');
-    Route::resource('faq-categories', FaqCategoryController::class)->except(['show']);
+
+    Route::patch('faqs/{faq}/toggle', [FaqController::class,'toggle'])
+        ->name('faqs.toggle');
+
+    Route::patch('faqs/{faq}/reorder', [FaqController::class,'reorder'])
+        ->name('faqs.reorder');
+
+    Route::resource('faq-categories', FaqCategoryController::class)
+        ->except(['show']);
+
 });
 
 
 
-Route::get('/pricing', [PricingController::class, 'index'])->name('pricing.index');
+// ============================================================
+// PRICING
+// ============================================================
+
+Route::get('/pricing', [PricingController::class, 'index'])
+    ->name('pricing.index');
 
 
 
+// ============================================================
+// AUTHORS (ADMIN)
+// ============================================================
 
 Route::middleware(['auth','can:admin-only'])->group(function () {
-    Route::resource('author', AuthorController::class); // author.index -> AuthorController@index
+    Route::resource('author', AuthorController::class);
 });
 
 
+
+// ============================================================
+// SOUND EFFECTS
+// ============================================================
 
 Route::middleware('auth')->group(function () {
+
+    // ---------- BROWSE ----------
     Route::get('/sound-effects/browse', [SoundEffectController::class, 'browse'])
         ->name('sound_effects.browse');
 
-    // kalau grid kategori kamu taruh di index:
+    // ---------- CATEGORY SHORTCUTS ----------
+    Route::get('/sound-effects/foley', [SoundEffectController::class, 'foley'])
+        ->name('sound_effects.foley');
+
+    Route::get('/sound-effects/soundscape', [SoundEffectController::class, 'soundscape'])
+        ->name('sound_effects.soundscape');
+
+    Route::get('/sound-effects/ambience', [SoundEffectController::class, 'ambience'])
+        ->name('sound_effects.ambience');
+
+    Route::get('/sound-effects/soundscoring', [SoundEffectController::class, 'soundscoring'])
+        ->name('sound_effects.soundscoring');
+
+    // ---------- LANDING ----------
     Route::get('/sound-effects', [SoundEffectController::class, 'index'])
         ->name('sound_effects.index');
 
+    // ---------- LEGACY LIST ----------
     Route::get('/sound-effects/list', [SoundEffectController::class, 'list'])
         ->name('sound_effects.list');
 
-    Route::resource('sound_effects', SoundEffectController::class)->except(['index']);
+    // ---------- PLAY COUNT ----------
+    Route::post('/sound-effects/{sound_effect}/play',
+        [SoundEffectController::class, 'incrementPlay'])
+        ->name('sound_effects.play');
+
+    // ---------- CRUD ----------
+    Route::resource('sound_effects', SoundEffectController::class)
+        ->except(['index']);
+
 });
+
+
+
+// ============================================================
+// SOUND TAXONOMY
+// ============================================================
 
 Route::middleware(['auth'])->group(function() {
+
     Route::resource('sound_categories', SoundCategoryController::class);
+
     Route::resource('sound_tags', SoundTagController::class);
+
     Route::resource('sound_licenses', SoundLicenseController::class);
+
 });
+
+
+
+// ============================================================
+// SOUND SUBCATEGORIES
+// ============================================================
 
 Route::middleware(['auth'])->group(function () {
-    // CRUD utama
+
     Route::resource('sound_subcategories', SoundSubcategoryController::class);
-    // route tambahan untuk filter subcategory by category (digunakan di form SoundEffect)
-    Route::get('sound_subcategories/by-category/{category}', 
-        [SoundSubcategoryController::class, 'byCategory']
-    )->name('sound_subcategories.byCategory');
+
+    Route::get('sound_subcategories/by-category/{category}',
+        [SoundSubcategoryController::class, 'byCategory'])
+        ->name('sound_subcategories.byCategory');
 
 });
 
+
+
+// ============================================================
+// 404 FALLBACK
+// ============================================================
+
+Route::fallback(function () {
+    return response()->view('errors.404', [], 404);
+});
